@@ -7,6 +7,7 @@
 /storage/*.key
 /public/images
 /public/files
+!public/image_system
 /vendor
 .env
 .env.backup
