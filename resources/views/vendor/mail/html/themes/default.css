@@ -3,8 +3,8 @@
 }
 
 .body {
-    font-family: "Roboto", sans-serif;
-    color: #3e3c7d;
+     
+    color: #2d66af;
     background-color: #ffffff;
     max-width: 600px;
     margin: 0 auto;
@@ -68,10 +68,9 @@
 
 .link-button-a {
     padding: 10px 20px;
-    background-color: #3e3c7d;
+    background-color: #2d66af;
     color: #c5d1ff;
     text-decoration: none;
-    border-radius: 60px;
     /* Typography */
     font-size: 20px;
     font-weight: 700;

@@ -22,18 +22,15 @@ class UserRepository extends BaseRepository implements BaseRepositoryInterface
         'lastname',
         'email',
         'code',
-        'document_type',
-        'area',
         'ndocument',
         'birthday',
-        'ncontact',
-        'area','enable'
+        'ncontact','enable'
     ];
 
     /**
      * @var array
      */
-    public array $includes = ['images', 'documentType', 'area'];
+    public array $includes = ['images'];
 
 
     /**
@@ -71,11 +68,9 @@ class UserRepository extends BaseRepository implements BaseRepositoryInterface
             'id' =>          ['name' => 'ID'],
             'name' =>        ['name' => __('Name')],
             'lastname' =>        ['name' => __('LastName')],
-            'document_type' =>        ['name' => __('Document type')],
             'ndocument' =>        ['name' => __('Document number')],
             'birthday' =>        ['name' => __('Birthday')],
             'ncontact' =>        ['name' => __('Contact number')],
-            'area' =>        ['name' => __('Area')],
             'email' =>        ['name' => __('Email')],
             'code' => ['code' => __('Code')],
             'created_at'=>   ['name' => __('Created at')],

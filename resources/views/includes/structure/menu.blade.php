@@ -8,7 +8,9 @@
     <div class="menu-main">
 
         <div class="img-movil">
+          <div style="background-color: rgba(255,255,255,0.6);">
           <img src="/image_system/menu/ligo.png" />
+          </div>
         </div>
 
 

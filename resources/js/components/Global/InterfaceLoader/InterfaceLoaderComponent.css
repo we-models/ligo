@@ -1,7 +1,6 @@
 .interface_loader {
     border: 16px solid var(--secondary); /* Light grey */
     border-top: 16px solid var(--accent); /* Blue */
-    border-radius: 50%;
     width: 120px;
     height: 120px;
     animation: interface_spin 2s linear infinite;

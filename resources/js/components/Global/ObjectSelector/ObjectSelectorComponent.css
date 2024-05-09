@@ -21,11 +21,9 @@
     height: auto;
     display: flex;
     border: 1px solid var(--accent) !important;
-    border-radius: 25px 0 0 25px;
 }
 
 .selector-button {
-    border-radius: 0 25px 25px;
     border: 1px solid var(--accent) !important;
     padding: unset;
     justify-content: center;
@@ -42,7 +40,6 @@
 }
 
 .file-image-container{
-    border-radius: 22px;
     background-color: var(--file);
     min-height: 150px;
     padding: 20px;
@@ -63,8 +60,7 @@
     border:1px solid var(--accent);
     width: fit-content;
     margin: 0 auto;
-    border-radius: 25px;
-    font-family: "Roboto", sans-serif;
+     
     font-weight: 400;
     font-size: 15px;
     line-height: 28px;

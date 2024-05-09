@@ -29,29 +29,13 @@
                 <div v-if="permissions.includes('.create')" id="create-tab-pane" aria-labelledby="create-tab"
                      class="tab-pane fade show active" tabindex="0">
 
-                    <template v-if="selected === '.create'">
-                        <template v-if="isObject !== '1'">
-                            <form-component  :csrf="csrf"
+                     <form-component  :csrf="csrf"
                                 :custom_fields="this.custom_fields"
                                 :fields="fields" :icons="icons" :object="object_"
                                 :title="t(title.toLowerCase(), 1)"
                                 :url="create"
                                 :prefix = "$t('Register new')"
                                 http_method="POST"/>
-                        </template>
-                        <template v-else>
-                            <form-object-component
-                                :csrf="csrf"
-                                :fields="fields"
-                                :custom_fields="this.custom_fields"
-                                :object="object_"
-                                :title="t(title.toLowerCase(), 1)"
-                                :url="create"
-                                :prefix = "$t('Register new')"
-                                http_method="POST"
-                            />
-                        </template>
-                    </template>
 
                 </div>
                 <div v-if="permissions.includes('.all')" id="list-tab-pane" aria-labelledby="list-tab"

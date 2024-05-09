@@ -3,14 +3,14 @@
 @section('content')
     <div class="main-login d-flex  justify-content-center align-items-center flex-column ">
         <div class="logo ">
-            <img src="/image_system/login/ligo.png" loading="lazy" alt="LIGO">
+            <div style="background-color: rgba(255,255,255,0.6);">
+                <img src="/image_system/login/ligo.png" loading="lazy" alt="LIGO">
+            </div>
+            
         </div>
 
 
         <div class="login-box d-flex  justify-content-center align-items-center flex-column">
-            <div class="avatar">
-                <i class="fa-regular fa-user icon-avatar"></i>
-            </div>
             <div class="title">
                 <p>
                     {{ __('Reset Password') }}

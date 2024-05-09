@@ -10,7 +10,7 @@ color: var(--primary);
 }
 
 .select-media-file-filter label {
-    font-family: "Roboto", sans-serif;
+     
     font-weight: 400;
     font-size: 16px;
     line-height: 28px;
@@ -48,10 +48,10 @@ color: var(--primary);
 }
 
 .media-file-card-container .show-details-button {
-    border-radius: 0px;
+
     position: absolute;
     right: 0;
-    background: var(--primary,#3e3c7d);
+    background: var(--primary);
 }
 .media-file-card-container .show-details-button i{
     color: var(--);

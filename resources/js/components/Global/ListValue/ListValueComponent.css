@@ -16,7 +16,7 @@
 .item-data {
     max-height: 150px;
     overflow-y: auto;
-    font-family: "Poppins", sans-serif;
+     
     font-weight: 500;
     font-size: 14px;
     color: var(--primary);

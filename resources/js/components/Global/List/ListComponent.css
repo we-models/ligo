@@ -31,7 +31,6 @@
     padding: 2px;
     border: 1px solid rgba(177, 176, 180, 1);
     margin: 5px;
-    border-radius: 6px;
 }
 
 .btn_view, .btn_edit, .btn_delete {
@@ -91,7 +90,6 @@ tr {
 .items-card .card{
     padding:20px;
     background-color: var(--file);
-    border-radius: 11px;
     border:none;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }

@@ -7,11 +7,9 @@ export interface TpUser {
     enable: number;
     name: string;
     lastname: string;
-    document_type: TpTheObject | null;
     ndocument: string;
     birthday: Date;
     ncontact: string;
-    area: TpTheObject | null;
     email: string;
     code: string;
     created_at: Date;

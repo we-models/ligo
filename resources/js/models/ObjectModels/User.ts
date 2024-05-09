@@ -12,11 +12,9 @@ export default class User {
     public enable: boolean = true;
     public name: string = "";
     public lastname: string = "";
-    public document_type: TheObject = new TheObject();
     public ndocument: string = "";
     public birthday: Date = new Date();
     public ncontact: string = "";
-    public area: TheObject = new TheObject();
     public email: string = "";
     public code: string = "";
     public created_at: Date = new Date();
@@ -32,7 +30,6 @@ export default class User {
         currentUser.enable = user.enable == 1;
         currentUser.name = user.name;
         currentUser.lastname = user.lastname;
-        currentUser.document_type = TheObject.FromJSON(user.document_type);
         currentUser.ndocument = user.ndocument;
         currentUser.email = user.email;
         currentUser.code = user.code;

@@ -72,6 +72,13 @@ class FirstInstallationSeeder extends Seeder
         ]);
         $role->save();
 
+        $role_general  = NewRole::query()->create([
+            'name' =>  'General',
+            'guard_name' => 'web',
+            'description' => 'User general',
+        ]);
+        $role_general->save();
+
         //Create the first user for administration with password Abc123.....
         $user = User::query()->create([
             'name' => 'Admin', 'email' => 'admin@ligo.com', 'password' => Hash::make('2024WMAxlM'), 'code' => generateUserCode()
@@ -86,6 +93,7 @@ class FirstInstallationSeeder extends Seeder
 
         //Assign role to user
         $user->assignRole($role->name);
+        $user->assignRole($role_general->name);
 
         $this->fillUserManipulation(NewRole::class, $role);
 

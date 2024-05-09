@@ -9,13 +9,9 @@
     top: 461px;
     left: 553px;
     background: var(--primary );
-    border-top-left-radius: 60px;
-    border-bottom-left-radius: 60px;
 }
 
 .icon-input-right-email {
-    border-top-right-radius: 60px;
-    border-bottom-right-radius: 60px;
     border: none;
     height: 42px;
 }

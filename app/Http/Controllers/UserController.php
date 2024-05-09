@@ -224,11 +224,9 @@ class UserController extends BaseController implements  MainControllerInterface 
             //$user->email = $request['email'];
             $user->name = $request['name'];
             $user->lastname = $request['lastname'];
-            $user->document_type = $request['document_type'];
             $user->ndocument = $request['ndocument'];
             $user->birthday = $request['birthday'];
             $user->ncontact = $request['ncontact'];
-            $user->area = $request['area'];
             $user->enable= $request['enable'];
 
             $user->images()->syncWithPivotValues($image, ['model_type' => User::class]);
@@ -347,7 +345,7 @@ class UserController extends BaseController implements  MainControllerInterface 
         $user = auth()->user();
 
         $user = User::query()->where('id',$user->getAuthIdentifier())
-        ->with(['images','documentType','area'])->first();
+        ->with(['images'])->first();
 
         return view('pages.general.profile',[
             'object' => $user,
@@ -392,11 +390,9 @@ class UserController extends BaseController implements  MainControllerInterface 
 
             $user->name = $request['name'];
             $user->lastname = $request['lastname'];
-            $user->document_type = $request['document_type'];
             $user->ndocument = $request['ndocument'];
             $user->birthday = $request['birthday'];
             $user->ncontact = $request['ncontact'];
-            $user->area = $request['area'];
             $user->enable= $request['enable'];
 
             $user->images()->syncWithPivotValues($image, ['model_type' => User::class]);

@@ -1,30 +1,27 @@
 :root {
-  --primary: #3e3c7d;
-  --secondary: #6370e0;
-  --accent: #c5d1ff;
+  --primary: #2d66af;
+  --secondary: #f2b20e;
+  --accent: #4eb9a4;
   --grey: #b1b0b4;
   --white: #ffffff;
   --black: #000000;
   --shade: #737293;
   --shadeSecondary: #00000040;
-  --links: #3e3c7dcf;
-  --background: #f8fafc;
+  --links: #484898;
+  --background: f8fafc; 
     --text:#747474;
-    --file:#EFF2FF
+    --file:#EFF2FF;
 }
 
 .logo-img img{
   max-width: 100px;
 }
 
-body{
-    font-family: "Poppins", sans-serif;
-}
 
 .main-login {
   padding: 60px 0;
   min-height: 100vh;
-  background: var(--primary, #3e3c7d);
+  background: var(--primary);
 }
 
 /* LOGO */
@@ -42,7 +39,6 @@ body{
 .login-box {
   max-width: 529px;
   height: fit-content;
-  border-radius: 34px;
   border: 1px solid var(--black, #000000);
   background: var(--accent, #c5d1ff);
   position: relative;
@@ -53,16 +49,14 @@ body{
 .profile-img {
   height: 63px;
   width: 63px;
-  border-radius: 50%;
 }
 
 /* AVATAR */
 .avatar {
   width: 114px;
   height: 115px;
-  border-radius: 50%;
   box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.25) inset;
-  background: var(--primary, #3e3c7d);
+  background: var(--primary);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -78,12 +72,12 @@ body{
 
 /* TITLE */
 .title p {
-  font-family: "Poppins", sans-serif;
+   
   font-size: 30px;
   font-weight: 700;
   line-height: 45px;
   letter-spacing: 0em;
-  color: var(--primary, #3e3c7d);
+  color: var(--primary);
   text-align: center;
 }
 
@@ -100,7 +94,7 @@ label{
 .msg-error {
   line-height: 24px;
   font-size: 16px;
-  color: var(--primary, #3e3c7d);
+  color: var(--primary);
 }
 
 /* ERROR-MSG */
@@ -128,12 +122,6 @@ label{
   margin: 3px;
 }
 
-/* INPUT-EMAIL */
-.input-email {
-  border-top-right-radius: 60px;
-  border-bottom-right-radius: 60px;
-}
-
 .input-group .input-email {
   border: none;
   box-shadow: none;
@@ -141,7 +129,7 @@ label{
 
 .input-email::placeholder {
   color: var(--accent, #c5d1ff);
-  font-family: "Poppins", sans-serif;
+   
 }
 
 /* ICON-LOCK-STYLE */
@@ -158,14 +146,14 @@ label{
 
 .input-password::placeholder {
   color: var(--accent, #c5d1ff);
-  font-family: "Poppins", sans-serif;
+   
 }
 
 
 /* LINK-FORGOT-PASSWORD */
 .link-forgot-password a {
   padding-top: 10px;
-  font-family: "Poppins", sans-serif;
+   
 
   font-size: 16px;
   font-weight: 400;
@@ -174,15 +162,14 @@ label{
   text-align: right;
 
   text-decoration: none;
-  color: var(--links, #3e3c7dcf);
+  color: var(--links);
 }
 
 /* BUTTON-SUBMIT */
 .button-submit button {
-  font-family: "Poppins", sans-serif;
+   
   min-width: 130px;
   height: 40px;
-  border-radius: 60px;
   border: 0px solid;
   font-size: 24px;
   font-weight: 700;
@@ -190,7 +177,7 @@ label{
   letter-spacing: 0em;
   text-align: center;
   margin-top: 30px;
-  color: var(--primary, #3e3c7d);
+  color: var(--primary);
   background: var(--white, #ffffff);
     padding: 2px 15px;
 }
@@ -230,7 +217,6 @@ label{
 /* Mid-seccion */
 
 .mid-seccion {
-  padding-top: 85px;
   display: flex;
 }
 
@@ -259,7 +245,6 @@ label{
   width: 40px;
   height: 40px;
   background: var(--accent);
-  border-radius: 50%;
 
   display: flex;
   justify-content: center;
@@ -298,7 +283,6 @@ label{
   width: 64px;
   height: 64px;
   background: var(--white);
-  border-radius: 50%;
     min-width: 64px;
     min-height: 64px;
   display: flex;
@@ -319,7 +303,7 @@ label{
 }
 
 .user-info .user-name {
-  font-family: "Poppins", sans-serif;
+   
   font-size: 20px;
   font-weight: 700;
   line-height: 30px;
@@ -328,7 +312,7 @@ label{
 }
 
 .user-info .user-email {
-  font-family: "Poppins", sans-serif;
+   
   font-size: 14px;
   font-weight: 400;
   line-height: 21px;
@@ -355,7 +339,7 @@ label{
 }
 
 .list a {
-  font-family: "Poppins", sans-serif;
+   
   font-size: 16px;
   font-weight: 400;
   line-height: 24px;
@@ -368,7 +352,7 @@ label{
 .icon-item-box {
   width: 48px;
   height: 48px;
-  border-radius: 50%;
+  
   background: var(--white);
 
   display: flex;
@@ -390,7 +374,7 @@ label{
 }
 
 .info-item a {
-  font-family: "Poppins", sans-serif;
+   
   /* font-family: Poppins; */
   font-size: 16px;
   font-weight: 400;
@@ -418,7 +402,7 @@ label{
 /* List multiple-items */
 
 .list-drop ul.show {
-  background: #3e3c7d;
+  background: var(--primary);
 }
 
 .list-drop .full-menu-dropdown {
@@ -474,7 +458,7 @@ label{
 }
 
 ul.show li a {
-  font-family: "Poppins", sans-serif;
+   
   font-size: 16px;
   font-weight: 400;
   line-height: 24px;
@@ -563,9 +547,6 @@ ul.show li a {
 }
 
 @media screen and (max-width: 576px) {
-  .mid-seccion {
-    padding-top: 38px;
-  }
 
   .menu-container {
     display: none;
@@ -691,10 +672,10 @@ ul.show li a {
 }
 
 .button-recover button {
-  font-family: "Poppins", sans-serif;
+   
   width: 175px;
   height: 40px;
-  border-radius: 60px;
+
   border: 0px solid;
   font-size: 24px;
   font-weight: 700;
@@ -702,12 +683,12 @@ ul.show li a {
   letter-spacing: 0em;
   text-align: center;
   margin-top: 30px;
-  color: var(--primary, #3e3c7d);
+  color: var(--primary);
   background: var(--white, #ffffff);
 }
 
 .list-title{
-    font-family: "Poppins", sans-serif;
+     
     color: var(--secondary) !important;
     font-size: 16px;
     font-weight: 700;
@@ -794,7 +775,7 @@ padding: 10px 0;
 
 .button-close-modal-show-file i{
   font-size: 27px;
-  color: var(--primary,#3e3c7d);
+  color: var(--primary);
 }
 
 

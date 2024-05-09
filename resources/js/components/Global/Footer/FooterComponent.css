@@ -1,15 +1,4 @@
-:root {
-    --primary: #3e3c7d;
-    --secondary: #6370e0;
-    --accent: #c5d1ff;
-    --grey: #b1b0b4;
-    --white: #ffffff;
-    --black: #000000;
-    --shade: #737293;
-    --shadeSecondary: #00000040;
-    --links: #3e3c7dcf;
-    --colorMainBar: #e9edff;
-}
+
 
 footer {
     display: flex;

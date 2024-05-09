@@ -28,11 +28,11 @@ thead th {
 }
 
 .title-section-card {
-    font-family: "Roboto", sans-serif;
+     
     font-size: 24px;
     font-weight: 700;
     line-height: 36px;
-    color: var(--primary, #3e3c7d);
+    color: var(--primary);
 
     width: 100%;
 }
@@ -63,7 +63,6 @@ thead th {
     padding: 5px 0;
     min-height: 70px;
     background: var(--white, #ffffff);
-    border-radius: 10px;
     border: 2px 0px 0px 0px;
     opacity: 0px;
 
@@ -76,7 +75,7 @@ thead th {
 }
 
 .name-identifier {
-    font-family: "Roboto", sans-serif;
+     
     font-size: 16px;
     /* margin-right: 40px; */
     color: #747474;
@@ -91,7 +90,6 @@ thead th {
 .avatar-assign {
     width: 50px;
     height: 50px;
-    border-radius: 50%;
     /* border: 1px solid #000000; */
     border: 1px solid #c5d1ff;
     background: var(--accent);
@@ -115,11 +113,11 @@ thead th {
 }
 
 .current-roles-title {
-    font-family: "Roboto", sans-serif;
+     
     font-size: 24px;
     font-weight: 700;
     line-height: 36px;
-    color: var(--primary, #3e3c7d);
+    color: var(--primary);
     margin-bottom: 10px;
 }
 
@@ -151,10 +149,9 @@ thead th {
     color: var(--primary);
     padding-left: 20px;
     padding-right: 20px;
-    border-radius: 10px 0px 0px 10px;
 
     /* typography */
-    font-family: "Roboto", sans-serif;
+     
     font-size: 16px;
     font-weight: 700;
     line-height: 24px;
@@ -169,7 +166,6 @@ thead th {
     /* width: 32px; */
     width: 32.68px;
     gap: 0px;
-    border-radius: 0px 10px 10px 0px;
     background: var(--file);
     cursor: pointer;
     /* display */
@@ -186,7 +182,6 @@ thead th {
 .divider {
     background: var(--accent, #c5d1ff);
     height: 3px;
-    border-radius: 0px 22px 22px 0px;
     opacity: 0px;
     margin-top: 20px;
     margin-bottom: 20px;
@@ -213,11 +208,11 @@ thead th {
 }
 
 .add-roles-title {
-    font-family: "Roboto", sans-serif;
+     
     font-size: 24px;
     font-weight: 700;
     line-height: 36px;
-    color: var(--primary, #3e3c7d);
+    color: var(--primary);
 }
 
 .add-roles-card {
@@ -225,7 +220,6 @@ thead th {
     padding-left: 20px;
     padding-right: 20px;
     min-height: 32.68px;
-    border-radius: 10px;
     background: #eff2ff;
     margin-right: 10px;
     margin-bottom: 10px;
@@ -235,7 +229,7 @@ thead th {
     align-items: center;
 
     /* typography */
-    font-family: "Roboto", sans-serif;
+     
     font-size: 16px;
     font-weight: 700;
     line-height: 24px;
@@ -332,9 +326,8 @@ thead th {
     }
     .assign-roles-section {
         width: 100%;
-        border: solid #6370e0;
+        border: solid var(--secondary);
         margin-top:5px;
-        border-radius: 8px;
         padding:10px;
     }
 
@@ -384,7 +377,7 @@ thead th {
 
 /*  Assign class card */
 .border-card {
-    border: solid #6370e0;
+    border: solid var(--secondary);
 }
 
 .loaderComponent {

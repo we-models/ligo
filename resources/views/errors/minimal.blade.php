@@ -15,12 +15,12 @@
             text-align: center;
             min-height: 100vh;
             width: 100%;
-            background-color: #3e3c7d;
+            background-color: #2d66af;
             overflow-x: hidden;
             display: flex;
             justify-content: center;
             flex-direction: column;
-            font-family: "Poppins", sans-serif;
+             
             color: #ffffff;
         }
         .error-code{

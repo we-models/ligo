@@ -18,23 +18,24 @@
 
     <style>
         :root {
-            --primary: #3e3c7d;
-            --secondary: #6370e0;
-            --accent: #c5d1ff;
+            --primary: #2d66af;
+            --secondary: #f2b20e;
+            --accent: #4eb9a4;
             --grey: #b1b0b4;
             --white: #ffffff;
             --black: #000000;
             --shade: #737293;
             --shadeSecondary: #00000040;
-            --links: #3e3c7dcf;
-            --background: #f8fafc;
+            --links: #484898;
+            --background: #f8fafc; 
             --headerEmail: #e9edff;
         }
+
 
         .body {
             margin: 0;
             padding: 0;
-            font-family: "Roboto", sans-serif;
+             
             background-color: #f8fafc;
             color: #3e3c7d;
 
@@ -90,7 +91,6 @@
             background-color: #3e3c7d;
             color: #c5d1ff;
             text-decoration: none;
-            border-radius: 60px;
             /* Typography */
             font-size: 20px;
             font-weight: 700;

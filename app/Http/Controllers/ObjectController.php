@@ -115,7 +115,7 @@ class ObjectController extends BaseController implements MainControllerInterface
             'language' => app()->getLocale(),
             'permissions' => $obj->getPermissionsForModel(),
             'logs' => route($obj->singular .  '.logs',    app()->getLocale()) . $this->getParams($request, true),
-            'custom_fields' => $this->getNew($objectType->slug)
+            'custom_fields' => $this->getCustomFieldsRelations($this->getParams($request, false))
         ]);
     }
 

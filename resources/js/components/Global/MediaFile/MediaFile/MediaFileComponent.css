@@ -26,7 +26,7 @@ select.form-control {
 
 .nav-link {
     background-color: var(--accent);
-    border-radius: 10px;
+
     color: var(--primary);
     font-size: 14px;
     font-weight: 400;
@@ -38,9 +38,8 @@ select.form-control {
 }
 
 .button-download-file{
-    font-family: "Poppins", sans-serif;
+     
     background-color: var(--secondary);
-    border-radius: 10px;
     color: var(--white);
     padding: 3px 15px;
     font-size: 16px;

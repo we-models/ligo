@@ -49,13 +49,11 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'lastname',
-        'document_type',
         'ndocument',
         'birthday',
         'ncontact',
         'email',
         'password',
-        'area',
         'code',
         'enable'
     ];
@@ -86,12 +84,10 @@ class User extends Authenticatable
         'id',
         'name',
         'lastname',
-        'document_type',
         'ndocument',
         'email',
         'birthday',
         'ncontact',
-        'area',
         'enable'
     ];
 
@@ -115,26 +111,11 @@ class User extends Authenticatable
         ]);
 
 
-
-        if($self){
-            $doctype= ObjectType::query()->where('slug', 'tipo_documento')->first();
-            $response = array_merge($response, [
-                (new Prop('document_type', 'Document type', [],8))->objectInput(new TheObject('?object_type=' . $doctype->id))
-            ]);
-        }
-
         $response = array_merge($response,[
             (new Prop('ndocument', 'N of document', [], 4))->textInput(),
             (new Prop('birthday', 'Birthday', [], 4))->dateInput(),
             (new Prop('ncontact', 'Telef contacto', [], 4))->telInput()
         ]);
-
-        if($self){
-            $area= ObjectType::query()->where('slug', 'area_trabajo')->first();
-            $response = array_merge($response, [
-                (new Prop('area', 'Area', [],4))->objectInput(new TheObject('?object_type=' . $area->id))
-            ]);
-        }
 
         $response = array_merge($response, [
             (new Prop('email', 'E-Mail Address', [], 8))->textInput(),
@@ -169,11 +150,9 @@ class User extends Authenticatable
             'name' => '',
             'lastname' => '',
             'email' => '',
-            'document_type' => null,
             'ndocument' => '',
             'birthday' => '',
-            'ncontact' => '',
-            'area' => null
+            'ncontact' => ''
         ];
     }
 
@@ -264,16 +243,5 @@ class User extends Authenticatable
             ->wherePivot('field', '=', 'images')
             ->withTimestamps();
     }
-
-    public function documentType(): HasOne
-    {
-        return $this->hasOne(TheObject::class, 'id', 'document_type');
-    }
-
-    public function area(): HasOne
-    {
-        return $this->hasOne(TheObject::class, 'id', 'area');
-    }
-
 
 }

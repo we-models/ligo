@@ -17,13 +17,7 @@ return new class extends Migration
 
             $table->boolean('enable')->after('lastname')->default(true);
 
-            $table->unsignedBigInteger('document_type')->nullable();
-            $table->foreign('document_type')->references('id')->on('object_types')->onDelete('cascade');
-
-            $table->unsignedBigInteger('area')->nullable();
-            $table->foreign('area')->references('id')->on('object_types')->onDelete('cascade');
-
-            $table->string('ndocument')->after('document_type')->nullable();
+            $table->string('ndocument')->after('lastname')->nullable();
             $table->string('birthday')->after('ndocument')->nullable();
             $table->string('ncontact')->after('birthday')->nullable();
         });
@@ -37,11 +31,9 @@ return new class extends Migration
 
         Schema::table('users', function (Blueprint $table) {
             $table->dropColumn('lastname');
-            $table->dropColumn('document_type');
             $table->dropColumn('ndocument');
             $table->dropColumn('birthday');
             $table->dropColumn('ncontact');
         });
-        Schema::dropIfExists('document_type');
     }
 };
