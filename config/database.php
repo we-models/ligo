@@ -108,6 +108,128 @@ return [
 
     'migrations' => 'migrations',
 
+    'tables' => [
+        'WE_ST_EN' => [
+            'table' => 'websockets_statistics_entries',
+            'id' => 'websockets_statistics_entry_id'
+        ],
+        'USERS' => [
+            'table' => 'users',
+            'id' => 'user_id'
+        ],
+        'PA_RE_TO' => [
+            'table' => 'password_reset_tokens',
+            'id' => 'password_reset_token_id'
+        ],
+        'PA_RE' => [
+            'table' => 'password_resets',
+            'id' => 'password_reset_id'
+        ],
+        'OA_AU_CO' => [
+            'table' => 'oauth_auth_codes',
+            'id' => 'oauth_auth_code_id'
+        ],
+        'OA_AC_TO' => [
+            'table' => 'oauth_access_tokens',
+            'id' => 'oauth_access_token_id'
+        ],
+        'OA_RE_TO' => [
+            'table' => 'oauth_refresh_tokens',
+            'id' => 'oauth_refresh_token_id'
+        ],
+        'OA_CL' => [
+            'table' => 'oauth_clients',
+            'id' => 'oauth_clients_id'
+        ],
+        'OA_PE_AC_CL' => [
+            'table' => 'oauth_personal_access_clients',
+            'id' => 'oauth_personal_access_client_id'
+        ],
+        'FA_JO' => [
+            'table' => 'failed_jobs',
+            'id' => 'failed_job_id'
+        ],
+        'PE_AC_TO' => [
+            'table' => 'personal_access_tokens',
+            'id' => 'personal_access_token_id'
+        ],
+        'ROLES' => [
+            'table' => 'roles',
+            'id' => 'role_id'
+        ],
+        'PERMISSIONS' => [
+            'table' => 'permissions',
+            'id' => 'permission_id'
+        ],
+        'AC_LO' => [
+            'table' => 'activity_log',
+            'id' => 'activity_log_id'
+        ],
+        'GROUPS' => [
+            'table' => 'groups',
+            'id' => 'group_id'
+        ],
+        'MO_HA_GROUP' => [
+            'table' => 'model_has_group',
+            'id' => 'model_has_group_id'
+        ],
+        'SESSIONS' => [
+            'table' => 'sessions',
+            'id' => 'session_id'
+        ],
+        'DA_TY' => [
+            'table' => 'data_types',
+            'id' => 'data_type_id'
+        ],
+        'CONFIG' => [
+            'table' => 'configurations',
+            'id' => 'configuration_id'
+        ],
+        'ME_FI' => [
+            'table' => 'media_files',
+            'id' => 'media_file_id'
+        ],
+        'MO_HA_ME_FI' => [
+            'table' => 'model_has_media_file',
+        ],
+        'OB_TYPE' => [
+            'table' => 'object_types',
+            'id' => 'object_type_id'
+        ],
+        'OB_TYPE_RE' => [
+            'table' => 'object_type_relations',
+            'id'  => 'object_type_relation_id'
+        ],
+        'FIELDS' => [
+            'table' => 'fields',
+            'id'  => 'field_id'
+        ],
+        'THE_OBJ' => [
+            'table' => 'the_objects',
+            'id'  => 'the_object_id'
+        ],
+        'OBJ_REL' => [
+            'table' => 'object_relations',
+            'id'  => 'object_relation_id'
+        ],
+        'OBJ_FI_VAL' => [
+            'table' => 'object_field_value',
+            'id'  => 'object_field_value_id'
+        ],
+        'ERR_LOG' => [
+            'table' => 'error_logs',
+            'id'  => 'error_log_id'
+        ],
+        'LINKS' => [
+            'table' => 'links',
+            'id'  => 'link_id'
+        ],
+        'US_MA' =>[
+            'table' => 'user_manipulations',
+            'id' => 'user_manipulation_id'
+        ]
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Redis Databases

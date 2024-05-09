@@ -2,15 +2,15 @@
 
 namespace App\Providers;
 
-use App\VendorPackage\OpPasswordBrokerManager;
-use App\VendorPackage\PasswordBrokerOp;
 use Illuminate\Support\ServiceProvider;
+use App\VendorPackage\OpPasswordBrokerManager;
 
 class OpPasswordResetServiceProvider extends ServiceProvider
 {
-    protected $defer = true;
-
-    public function register()
+    /**
+     * Register services.
+     */
+    public function register(): void
     {
         $this->registerPasswordBrokerManager();
     }
@@ -22,7 +22,10 @@ class OpPasswordResetServiceProvider extends ServiceProvider
         });
     }
 
-    public function provides()
+    /**
+     * Bootstrap services.
+     */
+    public function boot()
     {
         return ['auth.password'];
     }

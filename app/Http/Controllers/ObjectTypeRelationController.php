@@ -4,20 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Interfaces\MainControllerInterface;
 use App\Models\ObjectTypeRelation;
-use App\Models\ObjectType;
-use App\Repositories\BusinessRepository;
 use App\Repositories\LogRepository;
 use App\Repositories\ObjectTypeRelationRepository;
-use App\Repositories\ObjectRepository;
-use App\Repositories\ObjectTypeRepository;
-use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\Routing\ResponseFactory;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
-use \Illuminate\Contracts\Foundation;
+use Illuminate\Contracts\Foundation;
 use Exception;
+use Throwable;
 
 class ObjectTypeRelationController extends BaseController implements MainControllerInterface
 {
@@ -27,11 +23,6 @@ class ObjectTypeRelationController extends BaseController implements MainControl
      * @var ObjectTypeRelationRepository
      */
     private ObjectTypeRelationRepository $objectTypeRelationRepository;
-
-    /**
-     * @var BusinessRepository
-     */
-    private BusinessRepository $businessRepository;
 
     /**
      * @var LogRepository
@@ -45,13 +36,11 @@ class ObjectTypeRelationController extends BaseController implements MainControl
 
     /**
      * @param ObjectTypeRelationRepository $objectTypeRelationRepo
-     * @param BusinessRepository $businessRepo
      * @param LogRepository $logRepo
      */
-    public function __construct(ObjectTypeRelationRepository $objectTypeRelationRepo, BusinessRepository $businessRepo, LogRepository $logRepo)
+    public function __construct(ObjectTypeRelationRepository $objectTypeRelationRepo, LogRepository $logRepo)
     {
         $this->objectTypeRelationRepository = $objectTypeRelationRepo;
-        $this->businessRepository = $businessRepo;
         $this->logRepository = $logRepo;
     }
 
@@ -62,40 +51,51 @@ class ObjectTypeRelationController extends BaseController implements MainControl
      */
     public function all(Request $request): Response|JsonResponse  {
         $rq = getRequestParams($request);
-        $object_type_relations = $this->objectTypeRelationRepository->search($rq->search)->whereHas(BUSINESS_IDENTIFY)->with(BUSINESS_IDENTIFY)->sortable();
+        $object_type_relations = $this->objectTypeRelationRepository->search($rq->search)->sortable();
         return  $this->objectTypeRelationRepository->getResponse($object_type_relations, $rq);
     }
 
     public function store(Request $request): Response|Foundation\Application|ResponseFactory {
-        $bs = $request['business'];
-        // IS necessary remove the business from request
-        unset($request['business']);
 
-        $request['enable'] = $request['enable'] == 'on';
-        $request['visible_in_app'] = $request['visible_in_app'] == 'on';
-        $request['editable'] = $request['editable'] == 'on';
-        $request['required'] = $request['required'] == 'on';
-
-        $input = $request->all();
         try {
+            $request->validate([
+                'slug' => 'unique:App\Models\ObjectTypeRelation,slug',
+                'type_relationship' => 'required',
+                'object_type' => 'required',
+                'relation' => $request->type_relationship === 'object' ? 'required' : '',
+                'roles' => $request->type_relationship === 'user' ? 'required' : ''
+            ],[
+                'slug.unique' => __('The [slug] field must be unique, a record with this slug already exists'),
+                'type_relationship.required' => __('The [type_relationship] field is required'),
+                'object_type.required' => __('The [object_type] field is required'),
+                'relation.required' => __('The [relation] field is required'),
+                'roles.required' => __('The [roles] field is required')
+            ]);
+
+            $request['enable'] = $request['enable'] == 'on';
+            $request['editable'] = $request['editable'] == 'on';
+            $request['required'] = $request['required'] == 'on';
+
+            $input = $request->all();
+
             DB::beginTransaction();
+
             $object_type_relation = $this->objectTypeRelationRepository->create($input);
-            if(userCanViewBusiness($bs) && isset($bs)){
-                $object_type_relation->business()->syncWithPivotValues($bs, ['model_type' => ObjectTypeRelation::class]);
-            }else{
-                $bs = $this->businessRepository->makeModel()->where('code', session(BUSINESS_IDENTIFY))->first();
-                $object_type_relation->business()->syncWithPivotValues($bs->id, ['model_type' => ObjectTypeRelation::class]);
+
+            if ($request->has('roles') && is_array($request['roles'])){
+
+                foreach($input['roles'] as $role){
+                     DB::table('model_has_roles')->insert([
+                    'role_id' => $role,
+                    'model_type' => ObjectTypeRelation::class,
+                    'model_id' =>$object_type_relation->id
+                    ]);
+                }
             }
-
-
-            if(isset($request['video'])){
-                $object_type_relation->video()->syncWithPivotValues($request['video'], ['model_type' => ObjectTypeRelation::class,  'field' => 'video']);
-            }
-
             $this->saveManipulation($object_type_relation);
             DB::commit();
             return response(__('Success'), 200);
-        }catch (\Throwable $e){
+        }catch (Throwable $e){
             DB::rollBack();
             return response($e->getMessage(), 403);
         }
@@ -112,11 +112,11 @@ class ObjectTypeRelationController extends BaseController implements MainControl
         $object_type_relation = $this->objectTypeRelationRepository->find($id);
         if (empty($object_type_relation)) return response(__('Not found'), 404);
         return response([
-            'object' => $this->objectTypeRelationRepository->makeModel()->whereHas(BUSINESS_IDENTIFY)->with($this->objectTypeRelationRepository->includes)->find($id),
+            'object' => $this->objectTypeRelationRepository->makeModel()->with($this->objectTypeRelationRepository->includes)->find($id),
             'fields' => $fields,
             'icons' => getAllIcons(),
             'csrf' => csrf_token(),
-            'title'=> __('Show the Object type relation'),
+            'title'=> 'object_type_relation',
             'url' => '#'
         ]);
     }
@@ -132,11 +132,11 @@ class ObjectTypeRelationController extends BaseController implements MainControl
         $object_type_relation = $this->objectTypeRelationRepository->find($id);
         if (empty($object_type_relation)) return response(__('Not found'), 404);
         return response([
-            'object' => $this->objectTypeRelationRepository->makeModel()->whereHas(BUSINESS_IDENTIFY)->with($this->objectTypeRelationRepository->includes)->find($id),
+            'object' => $this->objectTypeRelationRepository->makeModel()->with($this->objectTypeRelationRepository->includes)->find($id),
             'fields' => $fields,
             'icons' => getAllIcons(),
             'csrf' => csrf_token(),
-            'title'=> __('Update the object type relation'),
+            'title'=> 'object_type_relation',
             'url' => route('object_type_relation.update', ['locale' => $lang, 'object_type_relation' => $id])
         ]);
     }
@@ -147,39 +147,51 @@ class ObjectTypeRelationController extends BaseController implements MainControl
      * @param int $id
      * @return Foundation\Application|ResponseFactory|Response
      * @throws Exception
-     *
-     * IF THE USER HAS NOT PERMISSIONS FOR THE SELECTED BUSINESS THE SYSTEM WILL APPLY THE CURRENT BUSINESS
      */
     public function update(Request $request, String $lang, int $id): Response|Foundation\Application|ResponseFactory {
-        $bs = $request['business'];
-        unset($request['business']);
 
-        $request['enable'] = $request['enable'] == 'on';
-        $request['visible_in_app'] = $request['visible_in_app'] == 'on';
-        $request['editable'] = $request['editable'] == 'on';
-        $request['required'] = $request['required'] == 'on';
-
-        $input = $request->all();
-        $object_type_relation = $this->objectTypeRelationRepository->makeModel()->where('id', $id)->whereHas(BUSINESS_IDENTIFY)->first();
         try {
+            $request->validate([
+                'type_relationship' => 'required',
+                'object_type' => 'required',
+                'relation' => $request->type_relationship === 'object' ? 'required' : '',
+                'roles' => $request->type_relationship === 'user' ? 'required' : ''
+            ],[
+                'type_relationship.required' => __('The [type_relationship] field is required'),
+                'object_type.required' => __('The [object_type] field is required'),
+                'relation.required' => __('The [relation] field is required'),
+                'roles.required' => __('The [roles] field is required')
+            ]);
+
+            $request['enable'] = $request['enable'] == 'on';
+            $request['editable'] = $request['editable'] == 'on';
+            $request['required'] = $request['required'] == 'on';
+
+            $input = $request->all();
+            $object_type_relation = $this->objectTypeRelationRepository->makeModel()->where('id', $id)->first();
+
             if($object_type_relation == null){
                 throw new Exception(__('The user can not update this item'));
             }
             DB::beginTransaction();
             $object_type_relation->update($input);
-            if(!userCanViewBusiness($bs) || !isset($bs)) {
-                $bs = $this->businessRepository->makeModel()->where('code', session(BUSINESS_IDENTIFY))->first();
-            }
 
-            if(isset($request['video'])){
-                $object_type_relation->video()->syncWithPivotValues($request['video'], ['model_type' => ObjectTypeRelation::class,  'field' => 'video']);
+            if ($request->has('roles') && is_array($request['roles'])){
+                $mapIdsRoles = [];
+                foreach ($input['roles'] as $value) {
+                    $mapIdsRoles[$value] = ['model_type'=> ObjectTypeRelation::class ];
+                }
+                /*
+                * https://laravel.com/docs/11.x/eloquent-relationships#syncing-associations
+                * Saves only the ids that are in the $mapIdsRoles array,
+                  if there is an id that is in the database but not in the $mapIdsRoles array it will be eliminated from the db.
+                */
+                $object_type_relation->roles()->sync($mapIdsRoles);
             }
-
-            $object_type_relation->business()->syncWithPivotValues($bs, ['model_type' => ObjectTypeRelation::class]);
             $this->saveManipulation($object_type_relation, 'updated');
             DB::commit();
             return response(__('Success'), 200);
-        }catch (\Throwable $e){
+        }catch (Throwable $e){
             DB::rollBack();
             return response($e->getMessage(), 403);
         }
@@ -192,7 +204,7 @@ class ObjectTypeRelationController extends BaseController implements MainControl
      * @throws Exception
      */
     public function destroy(String $lang, int $id): Response|JsonResponse|Foundation\Application|ResponseFactory {
-        $object_type_relation = $this->objectTypeRelationRepository->makeModel()->where('id', $id)->whereHas(BUSINESS_IDENTIFY)->first();
+        $object_type_relation = $this->objectTypeRelationRepository->makeModel()->where('id', $id)->first();
         try {
             if($object_type_relation == null){
                 throw new Exception(__('The user can not delete this item'));
@@ -202,7 +214,7 @@ class ObjectTypeRelationController extends BaseController implements MainControl
             $object_type_relation->delete();
             DB::commit();
             return response()->json(['delete' => 'success']);
-        }catch (\Throwable $e){
+        }catch (Throwable $e){
             DB::rollBack();
             return response($e->getMessage(), 403);
         }

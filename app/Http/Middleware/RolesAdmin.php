@@ -2,7 +2,6 @@
 
 namespace App\Http\Middleware;
 
-use App\Models\Business;
 use App\Models\NewRole;
 use Closure;
 use Illuminate\Http\Request;
@@ -23,15 +22,8 @@ class RolesAdmin
 
 
         $privates = ['POST', 'PUT', 'PATH', 'DELETE'];
-        $business = Business::query()->where('code', session('business'))->first();
         $roles = auth()->user()->getRoleNames()->toArray();
-        $roles = NewRole::query()
-            ->whereHas(BUSINESS_IDENTIFY, function ($q) use ($business){
-                $q->where(BUSINESS_IDENTIFY,$business->id);
-            })
-            ->whereIn('name', $roles)
-            //->where('is_admin', true)
-            ->count();
+        $roles = NewRole::query()->whereIn('name', $roles)->count();
 
         $methods =  array_intersect($privates, $request->route()->methods());
         if($roles == 0 && count($methods) > 0) return abort(403);

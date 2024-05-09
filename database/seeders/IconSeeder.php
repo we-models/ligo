@@ -10,10 +10,8 @@ class IconSeeder extends Seeder
 {
     /**
      * Run the database seeds.
-     *
-     * @return void
      */
-    public function run()
+    public function run(): void
     {
         DB::statement("
             INSERT INTO `icons` (`id`, `name`) VALUES
@@ -1005,7 +1003,8 @@ class IconSeeder extends Seeder
             (539, 'fas fa-won-sign'),
             (540, 'fas fa-wrench'),
             (541, 'fas fa-x-ray'),
-            (542, 'fas fa-yen-sign');
+            (542, 'fas fa-yen-sign'),
+            (990, 'fa-solid fa-link');
         ");
     }
 }

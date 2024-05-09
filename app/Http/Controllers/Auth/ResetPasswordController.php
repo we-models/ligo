@@ -5,16 +5,11 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Auth\Events\PasswordReset;
-use Illuminate\Contracts\Foundation\Application;
-use Illuminate\Contracts\View\Factory;
-use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Auth\ResetsPasswords;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Password;
-use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Http\JsonResponse;
 
 class ResetPasswordController extends Controller
 {
@@ -38,8 +33,6 @@ class ResetPasswordController extends Controller
      */
     protected $redirectTo = RouteServiceProvider::HOME;
 
-
-
     /**
      * Display the password reset view for the given token.
      *
@@ -51,10 +44,7 @@ class ResetPasswordController extends Controller
     public function showResetForm(Request $request)
     {
         $token = $request->route()->parameter('token');
-
-        if(isset($request['origin']) && $request['origin'] == 1){
-            return Redirect::to(APP_URL . '/#/reset-password?token=' . $token . '&email=' . $request->email);
-        }
+        auth()->logout();
 
         return view('auth.passwords.reset')->with(
             ['token' => $token, 'email' => $request->email]

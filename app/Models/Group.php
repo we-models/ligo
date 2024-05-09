@@ -3,24 +3,15 @@
 namespace App\Models;
 
 use App\Interfaces\BaseModelInterface;
-use Dyrynda\Database\Support\CascadeSoftDeletes;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use App\Properties\Prop;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use JetBrains\PhpStorm\ArrayShape;
-use Kyslik\ColumnSortable\Sortable;
-use Spatie\Activitylog\LogOptions;
-use Spatie\Activitylog\Models\Activity;
-use Spatie\Activitylog\Traits\LogsActivity;
 
 class Group extends BaseModel implements BaseModelInterface
 {
     /**
      * @var string[]
      */
-    public $fillable = ['name', 'icon', 'business'];
+    public $fillable = ['name', 'icon'];
 
     /**
      * @var string
@@ -50,16 +41,12 @@ class Group extends BaseModel implements BaseModelInterface
      */
     public function getFields(bool $self = false) : array
     {
-        return [
-            'name' => [
-                'properties' => ['width' => 6, 'label' => __('Name')],
-                'attributes' => ['type' => 'text', 'minlength' => 1, 'required' => true, 'class' => 'form-control']
-            ],
-            'icon' => [
-                'properties' => ['width' => 6, 'label' => __('Icon') ],
-                'attributes' => ['type' => 'icon', 'required' => true]
-            ]
+        $response = [
+            (new Prop('name', 'Name', [], 4))->textInput(),
+            (new Prop('icon', 'Icon', [],4))->objectInput(new Icon()),
         ];
+
+        return $this->getMergedFields($response);
     }
 
     /**
@@ -69,7 +56,7 @@ class Group extends BaseModel implements BaseModelInterface
         return [
             'id' =>0,
             'name' => '',
-            'icon' => '',
+            'icon' => null
         ];
     }
 
@@ -101,6 +88,10 @@ class Group extends BaseModel implements BaseModelInterface
             ->withTimestamps();
     }
 
+    public function icon(){
+        return $this->hasOne(Icon::class, 'id', 'icon');
+    }
+
     /**
      * @return BelongsToMany
      */
@@ -113,14 +104,5 @@ class Group extends BaseModel implements BaseModelInterface
             'model_id' )
             ->wherePivot('model_type', '=', Link::class)
             ->withTimestamps();
-    }
-
-    /**
-     * @return BelongsToMany
-     */
-    public function business(): BelongsToMany
-    {
-        if( auth()->user()->hasAnyRole(ALL_ACCESS))  return $this->all_business();
-        return $this->all_business()->where('code', '=',  session(BUSINESS_IDENTIFY));
     }
 }

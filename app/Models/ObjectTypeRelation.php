@@ -6,7 +6,6 @@ use App\Interfaces\BaseModelInterface;
 use App\Properties\Prop;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use Spatie\Activitylog\Models\Activity;
 
 class ObjectTypeRelation extends BaseModel implements BaseModelInterface
 {
@@ -15,8 +14,8 @@ class ObjectTypeRelation extends BaseModel implements BaseModelInterface
      */
     public $fillable = [
         'name', 'slug','type', 'object_type', 'relation', 'order', 'tab',
-        'enable', 'visible_in_app', 'editable', 'required' , 'filling_method',
-        'description', 'instructions'
+        'enable', 'editable', 'required' , 'filling_method',
+        'description','type_relationship', 'width'
     ];
 
     /**
@@ -31,7 +30,7 @@ class ObjectTypeRelation extends BaseModel implements BaseModelInterface
      */
 
     public array $sortable = [
-        'id', 'name', 'slug','type', 'object_type', 'relation', 'order', 'instructions',
+        'id', 'name', 'slug','type', 'object_type', 'relation', 'order',
         'tab', 'filling_method', 'required', 'description'];
 
     /**
@@ -52,48 +51,61 @@ class ObjectTypeRelation extends BaseModel implements BaseModelInterface
      */
     public function getFields(bool $self = false) : array
     {
-        $has_business = self::getCurrentBusiness() != null;
 
         $response = [
-            (new Prop('name', __('Name'), [], 4))->textInput(),
-            (new Prop('slug', __('Slug'), [], 4))->textInput(['maxlength' => 20, 'required' => true]),
-            (new Prop('type', __('Type'), [], 4))->selectInput(['unique'=> __('Unique'), 'multiple' => __('Multiple')]),
+            (new Prop('name', 'Name', [], 3))->textInput(),
+            (new Prop('slug', 'Slug', [], 2))->textInput(['maxlength' => 20, 'required' => true]),
+            (new Prop('type', 'Type', [], 2))->selectInput(['unique'=> 'Unique', 'multiple' => 'Multiple']),
+            (new Prop('type_relationship','Type of relationship', [],2,true))->selectInput([
+                'object' => __('object'),
+                'user' => __('user'),
+            ]),
+
+            (new Prop('filling_method','Filling method', [
+                [
+                    /*
+                      *show_only is activated when the value of field=>'type relationship' is equal to value=>'user'
+                    */
+                    'field'=> 'type_relationship',
+                    'value'=> 'user',
+                    'show_only' => [
+                        'selection' => 'Selection',
+                    ]
+                ]
+
+            ], 3))->selectInput([
+                'selection' => 'Selection',
+                'creation'=>'Creation',
+                'all' => 'All'
+            ]),
+
+            (new Prop('object_type','Object type', [],3))->objectInput(new ObjectType()),
 
 
-            (new Prop('description', __('Description'), [], 12, true))->textAreaInput(),
-
-            (new Prop('object_type', __('Object type'), [],4))->objectInput(new ObjectType()),
-            (new Prop('tab', __('Tab'), [
+            (new Prop('tab','Tab', [
                 ['field' => 'object_type', 'value' => null, 'operation' => '!=']
-            ], 4, false))->objectInput(new Field('?tab=1'), false, [
+            ], 3, false))->objectInput(new Field('?tab=1'), false, [
                 ['field'=>'object_type' ,'column'=>'object_type' ],
                 ['field'=>'tab' ,'column'=>'tab' ]
             ]),
 
-            (new Prop('relation', __('Relation'), [], 4))->objectInput(new ObjectType()),
+            (new Prop('relation', 'Relation', [
+                ['field' => 'type_relationship', 'value' => 'user', 'operation' => '!=']
+            ], 3))->objectInput(new ObjectType()),
 
-            (new Prop('enable', __('Enable'), [], 3))->booleanInput(),
-            (new Prop('visible_in_app', __('Visible in app'), [], 3))->booleanInput(),
-            (new Prop('editable', __('Editable'), [], 3))->booleanInput(),
-            (new Prop('required', __('Required'), [], 3))->booleanInput(),
+            (new Prop('roles','Roles', [
+                ['field' => 'type_relationship', 'value' => 'user', 'operation' => '=']
+            ], 3, true))->objectInput(new NewRole(), true, []),
 
-            (new Prop('filling_method', __('Filling method'), [], 4))->selectInput([
-                'selection' => __('Selection'),
-                'creation'=>__('Creation'),
-                'own_selection' => __('Own selection'),
-                'all' => __('All')
-            ]),
-            (new Prop('order', __('Order'), [], 4))->intInput(),
-            (new Prop('instructions', __('Instructions'), [], 8))->textAreaInput(),
-            (new Prop('video', __('Video instructive'), [], 4))->fileInput('video')
 
+            (new Prop('description', 'Description', [], 4, true))->textAreaInput(),
+            (new Prop('enable','Enable', [], 2))->booleanInput(),
+            (new Prop('editable', 'Editable', [], 2))->booleanInput(),
+            (new Prop('required','Required', [], 2))->booleanInput(),
+            (new Prop('order','Order', [], 2))->intInput(),
+            (new Prop('width', 'Width', [], 3))->intInput(['max' => 12]),
         ];
 
-        if($has_business){
-            $response = array_merge(
-                $response,[(new Prop('business', __('Business'), [], 12))->objectInput(new Business())]
-            );
-        }
         return $this->getMergedFields($response);
     }
 
@@ -105,20 +117,18 @@ class ObjectTypeRelation extends BaseModel implements BaseModelInterface
             'id' =>0,
             'name' => '',
             'slug' => '',
-            'video' => null,
+            'type_relationship'=> 'object',
             'description' => '',
             'order' => 1,
             'type' => 'unique',
             'object_type' => null,
             'filling_method' =>'selection',
             'relation' => null,
-            'instructions' => '',
             'tab' =>null,
             'enable' => true,
-            'visible_in_app' => true,
             'editable' =>true,
-            'business' => self::getCurrentBusiness(),
-            'required' =>false
+            'required' =>false,
+            'width' => 4
         ];
     }
 
@@ -139,32 +149,21 @@ class ObjectTypeRelation extends BaseModel implements BaseModelInterface
     }
 
     /**
-     * @return BelongsToMany
-     */
-    public function business(): BelongsToMany
-    {
-        if( auth()->user()->hasAnyRole(ALL_ACCESS)) return $this->all_business();
-        return $this->all_business()->where('code', '=',  session(BUSINESS_IDENTIFY));
-    }
-
-
-    public function video(){
-        return $this->belongsToMany(
-            File::class,
-            'model_has_file',
-            'model_id',
-            'file' )
-            ->wherePivot('model_type', '=', get_class($this))
-            ->wherePivot('field', '=', 'video')
-            ->withTimestamps();
-    }
-
-    /**
      * @return HasOne
      */
     public function tab(): HasOne
     {
         return $this->hasOne(Field::class, 'id', 'tab');
+    }
+
+
+    public function roles():BelongsToMany{
+        return $this->belongsToMany(
+            NewRole::class,
+            'model_has_roles',
+            'model_id',
+            'role_id'
+        );
     }
 
 }

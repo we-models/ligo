@@ -1,0 +1,397 @@
+thead th {
+    vertical-align: middle;
+}
+
+.cell {
+    cursor: pointer;
+}
+
+.cell-selected {
+    background-color: var(--secondary) !important;
+}
+
+.assign-content {
+    display: flex;
+}
+
+/* == SECCION-CARDS == */
+.cards-section {
+    flex: 3;
+    background: var(--file, #eff2ff);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    max-width: 500px;
+
+    padding: 30px 50px;
+}
+
+.title-section-card {
+    font-family: "Roboto", sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 36px;
+    color: var(--primary, #3e3c7d);
+
+    width: 100%;
+}
+
+.search-component {
+    width: 100%;
+}
+.pagination-component {
+    width: 100%;
+    position: relative;
+    left: -15px;
+}
+
+/* CARD-LIST-ASSIGN */
+.content-cards {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 65vh;
+    padding-left: 35px;
+    padding-right: 10px;
+    overflow-y: scroll;
+}
+
+.card-list-assign {
+    /* width: 254px; */
+    padding: 5px 0;
+    min-height: 70px;
+    background: var(--white, #ffffff);
+    border-radius: 10px;
+    border: 2px 0px 0px 0px;
+    opacity: 0px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    position: relative;
+    cursor: pointer;
+}
+
+.name-identifier {
+    font-family: "Roboto", sans-serif;
+    font-size: 16px;
+    /* margin-right: 40px; */
+    color: #747474;
+    text-wrap: wrap;
+    padding-left: 45px;
+    width: 100%;
+    /* Display */
+    display: flex;
+    flex-direction: column;
+}
+
+.avatar-assign {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    /* border: 1px solid #000000; */
+    border: 1px solid #c5d1ff;
+    background: var(--accent);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    left: -25px;
+}
+
+.avatar-assign i {
+    font-size: 30px;
+    color: var(--secondary, #6370e0);
+}
+
+/* == ASSIGN-ROLES-SECTION == */
+
+.assign-roles-section {
+    flex: 7;
+    padding: 30px 50px;
+}
+
+.current-roles-title {
+    font-family: "Roboto", sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 36px;
+    color: var(--primary, #3e3c7d);
+    margin-bottom: 10px;
+}
+
+.current-content {
+    display: flex;
+    flex-wrap: wrap;
+    /* gap: 10px; */
+}
+
+.current-roles-sectio {
+    /* margin-right: 10px;
+    /* padding-right: 10px; */
+    margin-bottom: 10px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.current-roles-card {
+  padding-right: 10px;
+
+    display: flex;
+    /* width: 162px; */
+    min-height: 33px;
+}
+
+.text-current-roles-card {
+    background: var(--accent);
+    color: var(--primary);
+    padding-left: 20px;
+    padding-right: 20px;
+    border-radius: 10px 0px 0px 10px;
+
+    /* typography */
+    font-family: "Roboto", sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 24px;
+
+    /* display */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.icon-current-roles-card {
+    /* width: 32px; */
+    width: 32.68px;
+    gap: 0px;
+    border-radius: 0px 10px 10px 0px;
+    background: var(--file);
+    cursor: pointer;
+    /* display */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.icon-current-roles-card i {
+    font-size: 14px;
+    color: var(--secondary);
+}
+
+.divider {
+    background: var(--accent, #c5d1ff);
+    height: 3px;
+    border-radius: 0px 22px 22px 0px;
+    opacity: 0px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+/* ADD-ROLES-SECTIO */
+.add-roles-sectio {
+    display: flex;
+    /* gap: 10px; */
+    cursor: pointer;
+    flex-wrap: wrap;
+}
+.title-add {
+    display: flex;
+    gap: 10px;
+    justify-content: start;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.title-add i {
+    font-size: 20px;
+    color: var(--primary);
+}
+
+.add-roles-title {
+    font-family: "Roboto", sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 36px;
+    color: var(--primary, #3e3c7d);
+}
+
+.add-roles-card {
+    /* width: 107.47px; */
+    padding-left: 20px;
+    padding-right: 20px;
+    min-height: 32.68px;
+    border-radius: 10px;
+    background: #eff2ff;
+    margin-right: 10px;
+    margin-bottom: 10px;
+    /* display */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    /* typography */
+    font-family: "Roboto", sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 24px;
+    color: var(--secondary, #6370e0);
+}
+
+.search-div{
+    margin-bottom: 20px;
+}
+
+/* RESPONSIVE */
+
+@media screen and (min-width: 1500px) {
+}
+
+@media screen and (min-width: 1024px) and (max-width: 1500px) {
+}
+
+@media screen and (min-width: 768px) and (max-width: 1023px) {
+    .card-list-assign {
+        /* width: 167px; */
+        height: 60px;
+    }
+
+    .avatar-assign {
+        width: 60px;
+        height: 60px;
+    }
+    .avatar-assign i {
+        font-size: 32px;
+    }
+
+    .name-identifier {
+        font-size: 16px;
+        font-weight: 500;
+        line-height: 24px;
+    }
+
+    .title-section-card {
+        font-size: 18px;
+        font-weight: 700;
+        line-height: 27px;
+        text-align: left;
+    }
+
+    .current-roles-title {
+        font-size: 18px;
+        line-height: 27px;
+    }
+
+    .add-roles-title {
+        font-size: 18px;
+        line-height: 27px;
+    }
+
+    .title-add i {
+        font-size: 14px;
+    }
+
+    .text-current-roles-card {
+        font-size: 14px;
+        line-height: 21px;
+    }
+
+    .add-roles-card {
+        font-size: 14px;
+        line-height: 21px;
+    }
+
+    /* .current-roles-card {
+        display: flex;
+        width: 129px;
+        height: 26px;
+    } */
+}
+
+@media screen and (min-width: 768px) and (max-width: 1200px) {
+    .cards-section {
+        max-width: 300px;
+    }
+}
+
+@media screen and (max-width: 767px) {
+    .assign-content {
+        display: block;
+    }
+    .add-roles-card {
+        font-size: 14px;
+        line-height: 21px;
+    }
+    .add-roles-title {
+        font-size: 18px;
+        line-height: 27px;
+    }
+    .assign-roles-section {
+        width: 100%;
+        border: solid #6370e0;
+        margin-top:5px;
+        border-radius: 8px;
+        padding:10px;
+    }
+
+    .pagination-component {
+        width: 100%;
+    }
+    .current-roles-title {
+        font-size: 18px;
+        line-height: 27px;
+    }
+    .name-identifier {
+        font-size: 16px;
+
+        padding-left: 50px;
+    }
+    .cards-section {
+        max-width: unset;
+    }
+
+    .card-list-assign {
+        /* width: 167px; */
+        /* height: 60px; */
+        min-height: 60px;
+    }
+
+    .avatar-assign {
+        width: 53px;
+        height: 53px;
+    }
+    .avatar-assign i {
+        font-size: 27px;
+    }
+
+    .text-current-roles-card {
+        font-size: 14px;
+        line-height: 21px;
+    }
+    .cards-section {
+        padding-right: 40px;
+
+        background: unset;
+    }
+}
+
+@media screen and (max-height: 940px) {
+}
+
+/*  Assign class card */
+.border-card {
+    border: solid #6370e0;
+}
+
+.loaderComponent {
+    padding: 20px;
+}
+
+.ellipsis {
+    text-overflow: ellipsis;
+    overflow-x: hidden;
+}

@@ -17,7 +17,7 @@ class LinkRepository extends BaseRepository implements BaseRepositoryInterface
     /**
      * @var array
      */
-    public array $includes = [BUSINESS_IDENTIFY, 'group'];
+    public array $includes = ['group'];
 
     /**
      * @return array
@@ -44,8 +44,7 @@ class LinkRepository extends BaseRepository implements BaseRepositoryInterface
             'name' =>        ['name' => __('Name')],
             'group' =>        ['name' => __('Group')],
             'url' =>        ['name' => __('Url')],
-            'created_at'=>   ['name' => __('Created at')],
-            'business' =>   ['name' => __('Business')]
+            'created_at'=>   ['name' => __('Created at')]
         ];
     }
 

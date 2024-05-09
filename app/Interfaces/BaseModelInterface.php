@@ -1,12 +1,10 @@
 <?php
 
 namespace App\Interfaces;
-
 use Spatie\Activitylog\LogOptions;
 
 interface BaseModelInterface
 {
-
     /**
      * @return array
      */
@@ -32,5 +30,4 @@ interface BaseModelInterface
      * @return array
      */
     public function publicAttributes():array;
-
 }

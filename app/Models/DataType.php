@@ -2,9 +2,6 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Kyslik\ColumnSortable\Sortable;
-
 class DataType extends BaseModel
 {
     /**
@@ -38,7 +35,7 @@ class DataType extends BaseModel
     public function getFields(bool $self = false) : array  {
         return [
             'name' => [
-                'properties' => ['width' => 6, 'label' => __('Name')],
+                'properties' => ['width' => 6, 'label' => 'Name' ],
                 'attributes' => ['type' => 'text', 'minlength' => 1, 'required' => true, 'class' => 'form-control']
             ]
         ];

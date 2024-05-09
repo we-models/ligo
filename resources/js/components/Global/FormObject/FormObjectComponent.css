@@ -1,0 +1,166 @@
+.option_select {
+    margin-right: 15px;
+    font-size: 25px;
+}
+
+input:focus,
+textarea:focus,
+form:focus,
+select:focus {
+    outline: none;
+}
+
+.form-flex {
+    padding-top: 15px;
+    flex-direction: column;
+    display: flex;
+    gap: 10px;
+    position: relative;
+}
+
+.crud-title {
+    margin-top: 5px;
+}
+
+.form-fields {
+    display: flex;
+    flex-direction: row;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.form-fields-row {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    gap: 15px;
+}
+
+.form-fields-row .field {
+    min-width: 300px;
+}
+
+input.form-control {
+    border: 1px solid var(--accent) !important;
+    border-radius: 25px;
+}
+
+.form-label {
+    margin-bottom: 0;
+}
+
+.form-label,
+input {
+    font-family: "Roboto", sans-serif;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 28px;
+    color: var(--text);
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-check {
+    position: relative;
+    padding-left: 0;
+}
+
+.form-switch {
+    padding-left: 0;
+    margin-top: 25px;
+    display: inline-flex;
+}
+
+.flex-form {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 25px;
+}
+
+.flex-form-item {
+    width: fit-content;
+}
+
+.form-check .form-check-input {
+    margin-left: 0;
+    margin-top: 5px;
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+input[type="date"] {
+    background-image: linear-gradient(to left, var(--accent) 45px, transparent 10px, transparent);
+}
+
+.justify-content-md-end {
+    text-align: right;
+}
+
+.btn-submit, .btn-clean {
+    border-radius: 25px;
+    font-size: 16px;
+    font-weight: 700;
+    padding: 0 25px;
+    line-height: 36px;
+    font-family: "Poppins", sans-serif;
+}
+
+.btn-submit {
+    background-color: var(--primary);
+    color: var(--white);
+}
+
+.btn-clean {
+    background-color: var(--shade);
+    color: var(--white);
+}
+
+.between {
+    display: flex;
+    flex-direction: row;
+    justify-content: end;
+    gap: 15px;
+}
+
+.full-large {
+    min-width: 100%;
+}
+
+.half-large {
+    max-width: 1200px;
+}
+
+.card-tab-flex {
+    display: flex;
+    gap: 25px;
+    flex-wrap: wrap;
+}
+
+.only-label {
+    margin-top: 5px;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+@media screen and (max-width: 1024px) {
+    .form-fields {
+        flex-direction: column;
+    }
+
+    .between {
+        justify-content: space-between;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .between {
+        flex-direction: column;
+    }
+
+    .flex-form-item {
+        display: contents;
+    }
+}

@@ -1,3 +1,0 @@
-Run this on production
-php artisan config:cache
-

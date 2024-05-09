@@ -32,18 +32,19 @@ class Prop
         $this->condition = $condition;
     }
 
-    private function propertyHeader():array{
+    private function propertyHeader($sortable):array{
         return [
             'properties' => [
                 'width' => $this->width,
-                'label' => $this->label
+                'label' => $this->label,
+                'sortable' => $sortable
             ],
         ];
     }
 
-    public function propertyTemplate(array $attributes = []):array{
+    public function propertyTemplate(array $attributes = [], bool $sortable = true):array{
         return [
-            $this->name => array_merge($this->propertyHeader(), $attributes)
+            $this->name => array_merge($this->propertyHeader($sortable), $attributes)
         ];
     }
 
@@ -76,11 +77,24 @@ class Prop
         ]);
     }
 
-    public function intInput():array{
+    public function intInput(array $attrib = []):array{
+        $attributes = [
+            'type' => 'number',
+            'min' => 0,
+            'required' => $this->required,
+            'class' => 'form-control',
+            'conditions' => $this->condition
+        ];
+        $attributes = array_merge($attributes, $attrib);
+
+        return $this->propertyTemplate([
+            'attributes' => $attributes
+        ]);
+    }
+    public function dateInput():array{
         return $this->propertyTemplate([
             'attributes' => [
-                'type' => 'number',
-                'min' => 0,
+                'type' => 'date',
                 'required' => $this->required,
                 'class' => 'form-control',
                 'conditions' => $this->condition
@@ -88,6 +102,16 @@ class Prop
         ]);
     }
 
+    public function telInput():array{
+        return $this->propertyTemplate([
+            'attributes' => [
+                'type' => 'tel',
+                'required' => $this->required,
+                'class' => 'form-control',
+                'conditions' => $this->condition
+            ]
+        ]);
+    }
 
     public function textAreaInput():array {
         return $this->propertyTemplate([
@@ -148,10 +172,27 @@ class Prop
         ]);
     }
 
-    public function objectInput( $object, bool $multiple = false, array $depends = [] ):array{
+    public function objectInput($object, bool $multiple = false, array $depends = [],$attrib = [] ):array{
+        $attributes =  [
+                'type' => 'object',
+                'name' => $this->name ,
+                'required' => $this->required,
+                'multiple' => $multiple,
+                'data' => $object->publicAttributes() ,
+                'conditions' => $this->condition,
+                'depends' => $depends == [] ? null : $depends,
+        ];
+
+        $attributes = array_merge($attributes, $attrib);
+        return $this->propertyTemplate([
+            'attributes' => $attributes
+        ]);
+    }
+
+    public function iconInput( $object, bool $multiple = false, array $depends = [] ):array{
         return  $this->propertyTemplate([
             'attributes' => [
-                'type' => 'object',
+                'type' => 'icon',
                 'name' => $this->name ,
                 'required' => $this->required,
                 'multiple' => $multiple,
@@ -174,7 +215,7 @@ class Prop
                 'multiple' => $multiple,
                 'data' => (new ImageFile())->publicAttributes()
             ]
-        ]);
+        ], false);
     }
 
     public function fileInput(string $name = "file",  bool $multiple = false ):array{
@@ -186,7 +227,7 @@ class Prop
                 'multiple' => $multiple,
                 'data' => (new File())->publicAttributes()
             ]
-        ]);
+        ], false);
     }
 
 

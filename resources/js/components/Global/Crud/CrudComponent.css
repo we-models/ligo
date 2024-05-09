@@ -1,0 +1,35 @@
+[v-cloak] {
+    display: none;
+}
+
+.form-div {
+    padding: 25px 0;
+}
+
+.tab-pane {
+    background-color: var(--background);
+}
+
+.nav-link {
+    background-color: var(--accent);
+    border-radius: 10px;
+    color: var(--primary);
+    font-weight: 700;
+    font-size: 14px;
+    font-family: "Poppins", sans-serif;
+}
+
+.all_tabs {
+    gap: 5px;
+}
+
+@media (max-width: 768px) {
+    .form-div {
+        padding: 15px 5px;
+    }
+
+    .nav-link {
+        font-size: 15px;
+        font-weight: 600;
+    }
+}

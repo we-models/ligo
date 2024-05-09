@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\Business;
 use App\Models\Configuration;
 use App\Models\SystemConfiguration;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -12,12 +11,9 @@ class ConfigurationsSeeder extends Seeder
 {
     /**
      * Run the database seeds.
-     *
-     * @return void
      */
-    public function run()
+    public function run(): void
     {
-        $bs = Business::query()->first();
         $config = Configuration::create([
             'name' => 'MAIL_MAILER',
             'description' => 'El protocolo de Correo electrónico',
@@ -29,8 +25,7 @@ class ConfigurationsSeeder extends Seeder
 
         $sys_config = SystemConfiguration::create([
             'configuration' => $config->id,
-            'value' => 'smtp',
-            'business' => $bs->id,
+            'value' => 'smtp'
         ]);
         $sys_config->save();
 
@@ -45,8 +40,7 @@ class ConfigurationsSeeder extends Seeder
 
         $sys_config = SystemConfiguration::create([
             'configuration' => $config->id,
-            'value' => 'smtp.gmail.com',
-            'business' => $bs->id,
+            'value' => 'smtp.gmail.com'
         ]);
         $sys_config->save();
 
@@ -61,8 +55,7 @@ class ConfigurationsSeeder extends Seeder
 
         $sys_config = SystemConfiguration::create([
             'configuration' => $config->id,
-            'value' => 465,
-            'business' => $bs->id,
+            'value' => 465
         ]);
         $sys_config->save();
 
@@ -77,8 +70,7 @@ class ConfigurationsSeeder extends Seeder
 
         $sys_config = SystemConfiguration::create([
             'configuration' => $config->id,
-            'value' => 'developer.ecuador@gmail.com',
-            'business' => $bs->id,
+            'value' => 'developer.ecuador@gmail.com'
         ]);
         $sys_config->save();
 
@@ -93,8 +85,7 @@ class ConfigurationsSeeder extends Seeder
 
         $sys_config = SystemConfiguration::create([
             'configuration' => $config->id,
-            'value' => 'qpurcuhlmvnwwqtf',
-            'business' => $bs->id,
+            'value' => 'qpurcuhlmvnwwqtf'
         ]);
         $sys_config->save();
 
@@ -107,22 +98,23 @@ class ConfigurationsSeeder extends Seeder
         ]);
         $config->save();
 
-
         $config = Configuration::create([
-            'name' => 'WP_LINK',
-            'description' => 'Conexión con WordPress',
-            'default' => null,
-            'type' => 18,
-            'custom_by_user' => true
+            'name' => 'GRUPO_DEFECTO',
+            'description' => 'Grupo por defecto para objeto',
+            'default' => 9,
+            'type' => 7,
+            'custom_by_user' => false
         ]);
         $config->save();
 
-        $sys_config = SystemConfiguration::create([
-            'configuration' => $config->id,
-            'value' => 'ssl',
-            'business' => $bs->id,
+        $config = Configuration::create([
+            'name' => 'DEBUG',
+            'description' => 'Permite mostrar elementos del sistema ocultos para depurar el app.',
+            'default' => false,
+            'type' => 13,
+            'custom_by_user' => false
         ]);
-        $sys_config->save();
+        $config->save();
 
         $system_configs = [
             ['configuration' => 1, 'value' => 'smtp'],
@@ -134,7 +126,6 @@ class ConfigurationsSeeder extends Seeder
         ];
 
         foreach ($system_configs as $config){
-            $config[BUSINESS_IDENTIFY] = $bs->id;
             SystemConfiguration::query()->create($config);
         }
     }

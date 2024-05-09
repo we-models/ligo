@@ -7,7 +7,6 @@ namespace App\Repositories;
 use App\Interfaces\BaseRepositoryInterface;
 use App\Models\Group;
 use Illuminate\Database\Eloquent\Builder;
-use JetBrains\PhpStorm\ArrayShape;
 
 /**
  *
@@ -22,7 +21,7 @@ class GroupRepository extends BaseRepository implements BaseRepositoryInterface
     /**
      * @var array
      */
-    public array $includes = [BUSINESS_IDENTIFY, 'roles', 'permissions'];
+    public array $includes = ['roles', 'permissions', 'icon'];
 
     /**
      * @return array
@@ -34,7 +33,6 @@ class GroupRepository extends BaseRepository implements BaseRepositoryInterface
             'name' =>        ['name' => __('Name')],
             'icon' =>        ['name' => __('Icon')],
             'created_at'=>   ['name' => __('Created at')],
-            'business' =>   ['name' => __('Business')],
             'roles' =>   ['name' => __('Roles')],
             'permissions' =>   ['name' => __('Permissions')]
         ];

@@ -49,26 +49,17 @@ class RatingTypeController extends BaseController implements MainControllerInter
     public function all(Request $request): Response|JsonResponse  {
         $rq = getRequestParams($request);
         $ratingTypes = $this->ratingTypeRepository->search($rq->search);
-        $ratingTypes = $ratingTypes->whereHas(BUSINESS_IDENTIFY)->with(BUSINESS_IDENTIFY)->sortable();
+        $ratingTypes = $ratingTypes->sortable();
         return  $this->ratingTypeRepository->getResponse($ratingTypes, $rq);
     }
 
     public function store(Request $request): Response|Application|ResponseFactory
     {
-        $bs = $request['business'];
-        // IS necessary remove the business from request
-        unset($request['business']);
 
         $input = $request->all();
         try {
             DB::beginTransaction();
             $ratingType = $this->ratingTypeRepository->create($input);
-            if(userCanViewBusiness($bs) && isset($bs)){
-                $ratingType->business()->syncWithPivotValues($bs, ['model_type' => RatingType::class]);
-            }else{
-                $bs = $this->ratingTypeRepository->makeModel()->where('code', session(BUSINESS_IDENTIFY))->first();
-                $ratingType->business()->syncWithPivotValues($bs->id, ['model_type' => RatingType::class]);
-            }
             $this->saveManipulation($ratingType);
             DB::commit();
             return response(__('Success'), 200);
@@ -89,7 +80,7 @@ class RatingTypeController extends BaseController implements MainControllerInter
         $ratingType = $this->ratingTypeRepository->find($id);
         if (empty($ratingType)) return response(__('Not found'), 404);
         return response()->json([
-            'object' => $this->ratingTypeRepository->makeModel()->whereHas(BUSINESS_IDENTIFY)->with($this->ratingTypeRepository->includes)->find($id),
+            'object' => $this->ratingTypeRepository->makeModel()->with($this->ratingTypeRepository->includes)->find($id),
             'fields' => $fields,
             'icons' => [],
             'csrf' => csrf_token(),
@@ -109,7 +100,7 @@ class RatingTypeController extends BaseController implements MainControllerInter
         $ratingType = $this->ratingTypeRepository->find($id);
         if (empty($ratingType)) return response(__('Not found'), 404);
         return response()->json([
-            'object' => $this->ratingTypeRepository->makeModel()->whereHas(BUSINESS_IDENTIFY)->with($this->ratingTypeRepository->includes)->find($id),
+            'object' => $this->ratingTypeRepository->makeModel()->with($this->ratingTypeRepository->includes)->find($id),
             'fields' => $fields,
             'icons' => [],
             'csrf' => csrf_token(),
@@ -124,25 +115,18 @@ class RatingTypeController extends BaseController implements MainControllerInter
      * @param int $id
      * @return Foundation\Application|ResponseFactory|Response
      * @throws Exception
-     *
-     * IF THE USER HAS NOT PERMISSIONS FOR THE SELECTED BUSINESS THE SYSTEM WILL APPLY THE CURRENT BUSINESS
      */
     public function update(Request $request, String $lang, int $id): Response|Foundation\Application|ResponseFactory {
-        $bs = $request['business'];
-        unset($request['business']);
+        
 
         $input = $request->all();
-        $ratingType = $this->ratingTypeRepository->makeModel()->where('id', $id)->whereHas(BUSINESS_IDENTIFY)->first();
+        $ratingType = $this->ratingTypeRepository->makeModel()->where('id', $id)->first();
         try {
             if($ratingType == null){
                 throw new Exception(__('The user can not update this item'));
             }
             DB::beginTransaction();
             $ratingType->update($input);
-            if(!userCanViewBusiness($bs) || !isset($bs)) {
-                $bs = $this->ratingTypeRepository->makeModel()->where('code', session(BUSINESS_IDENTIFY))->first();
-            }
-            $ratingType->business()->syncWithPivotValues($bs, ['model_type' => RatingType::class]);
             $this->saveManipulation($ratingType, 'updated');
 
             DB::commit();
@@ -160,7 +144,7 @@ class RatingTypeController extends BaseController implements MainControllerInter
      * @throws Exception
      */
     public function destroy(String $lang, int $id): Response|JsonResponse|Foundation\Application|ResponseFactory {
-        $ratingType = $this->ratingTypeRepository->makeModel()->where('id', $id)->whereHas(BUSINESS_IDENTIFY)->first();
+        $ratingType = $this->ratingTypeRepository->makeModel()->where('id', $id)->first();
         try {
             if($ratingType == null){
                 throw new Exception(__('The user can not delete this item'));

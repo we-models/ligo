@@ -12,19 +12,19 @@ class ObjectRepository extends BaseRepository implements BaseRepositoryInterface
     /**
      * @var array|string[]
      */
-    protected array $fields =['name', 'description', 'excerpt', 'object_type', 'visible', 'owner', 'parent'];
+    protected array $fields =['name', 'description', 'excerpt', 'object_type', 'visible', 'parent', 'internal_id'];
 
     /**
      * @var array
      */
-    public array $includes = [BUSINESS_IDENTIFY, 'owner', 'parent', 'object_type', 'images'];
+    public array $includes = ['parent', 'object_type', 'images'];
 
     /**
      * @return array
      */
     public function getFieldsSearchable(): array
     {
-        return ['name', 'description', 'excerpt'];
+        return ['name', 'description', 'excerpt', 'internal_id'];
     }
 
     /**
@@ -42,15 +42,12 @@ class ObjectRepository extends BaseRepository implements BaseRepositoryInterface
     {
         return [
             'id' =>          ['name' => 'ID'],
+            'internal_id' =>          ['name' => 'Internal ID'],
             'name' =>        ['name' => __('Name')],
             'description' => ['name' => __('Description')],
-            'excerpt' =>        ['name' => __('Excerpt')],
             'object_type' =>        ['name' => __('Object type')],
-            'visible' =>      ['name' => __('Visible')],
-            'owner' => ['name' => __('Owner')],
-            'parent' => ['name' => __('Parent')],
-            'created_at'=>   ['name' => __('Created at')],
-            'business' =>   ['name' => __('Business')]
+            // 'owner' => ['name' => __('Owner')],
+            'created_at'=>   ['name' => __('Created at')]
         ];
     }
 

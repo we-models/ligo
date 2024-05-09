@@ -3,8 +3,6 @@
 namespace App\Models;
 
 use App\Interfaces\BaseModelInterface;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Link extends BaseModel implements BaseModelInterface
@@ -41,14 +39,13 @@ class Link extends BaseModel implements BaseModelInterface
      */
     public function getFields(bool $self = false) : array
     {
-        $has_business = self::getCurrentBusiness() != null;
-        $response = [
+        return [
             'name' => [
-                'properties' => ['width' => 6, 'label' => __('Name')],
+                'properties' => ['width' => 6, 'label' => 'Name'],
                 'attributes' => ['type' => 'text', 'minlength' => 1, 'required' => true, 'class' => 'form-control']
             ],
             'group' => [
-                'properties' => ['width' => 6, 'label' => __('Group')],
+                'properties' => ['width' => 6, 'label' => 'Group'],
                 'attributes' => [
                     'type' => 'object',
                     'name' =>'group',
@@ -58,29 +55,15 @@ class Link extends BaseModel implements BaseModelInterface
                 ]
             ],
             'url' => [
-                'properties' => ['width' => 12, 'label' => __('Url')],
+                'properties' => ['width' => 12, 'label' => 'Url'],
                 'attributes' => ['type' => 'text', 'minlength' => 1, 'required' => true, 'class' => 'form-control']
             ],
 
         ];
-        if($has_business){
-            $response = array_merge($response, [
-                'business' => [
-                    'properties' => ['width' => 12, 'label' => __('Business')],
-                    'attributes' => [
-                        'type' => 'object',
-                        'name' =>'business',
-                        'required' => true,
-                        'multiple' => false ,
-                        'data' => (new Business())->publicAttributes()
-                    ]
-                ],
-            ]);
-        }
-        return $response;
     }
 
     /**
+     * @param string $parameters
      * @return array
      */
     public static function newObject(string $parameters = "") : array
@@ -89,18 +72,8 @@ class Link extends BaseModel implements BaseModelInterface
             'id' =>0,
             'name' => '',
             'url' => 'https://',
-            'group' => null,
-            'business' => self::getCurrentBusiness()
+            'group' => null
         ];
-    }
-
-    /**
-     * @return BelongsToMany
-     */
-    public function business(): BelongsToMany
-    {
-        if( auth()->user()->hasAnyRole(ALL_ACCESS)) return $this->all_business();
-        return $this->all_business()->where('code', '=',  session(BUSINESS_IDENTIFY));
     }
 
     /**

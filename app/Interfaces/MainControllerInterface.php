@@ -10,8 +10,8 @@ use Illuminate\Http\Request;
 use \Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\Response;
 
-interface MainControllerInterface {
-
+interface MainControllerInterface
+{
     /**
      * @param Request $request
      * @return View|Factory|Application

@@ -2,13 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Business;
-use App\Models\Channel;
-use App\Models\FCMToken;
 use App\Models\Group;
 use App\Models\NewRole;
 use App\Models\NewPermission;
-use App\Models\Notification;
 use App\Models\ObjectType;
 use App\Models\User;
 use Illuminate\Contracts\Foundation\Application;
@@ -16,11 +12,8 @@ use Illuminate\Contracts\Routing\ResponseFactory;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Exception;
-use Kutia\Larafirebase\Facades\Larafirebase;
-use Tests\Entities\PostType;
 
 /**
  *  THE CONTROLLER IS USED TO SAVE RELATIONS MANY TO MANY BETWEEN 2 MODELS
@@ -48,7 +41,17 @@ class AssignmentController extends Controller {
         $noAdmin = !auth()->user()->hasAnyRole(ALL_ACCESS);
 
         // THE SEARCH AND PAGINATE QUERY IS ONLY FOR THE COLUMN
-        $column = $column_object::query()->where('name', 'like', '%' . $rq->search . '%');
+
+        $theClass = app()->make($column_object);
+
+        $column = $column_object::query()->where(function($q) use($rq, $theClass){
+            $values = $theClass->getFillable();
+            foreach ($values as $value){
+                $q->orWhere($value, 'like', '%' . $rq->search . '%');
+            }
+        });
+
+
         if($column_object == NewRole::class && $noAdmin ){
             $column = $column->whereIn('id', $userDataObject->roles);
         }
@@ -63,21 +66,9 @@ class AssignmentController extends Controller {
         }
 
         if($column_object == User::class && $request['general'] ){
-            $column = $column->role('Contact')->whereHas(BUSINESS_IDENTIFY);
+            $column = $column->role('Contact');
         }
 
-        if($column_object == Channel::class){
-            $column = $column_object::query()->where('channels.name', 'like', '%' . $rq->search . '%');
-
-            $column = $column->join('objects as obj1', 'obj1.id', '=', 'channels.profile_user1')
-                ->join('objects as obj2', 'obj2.id', '=', 'channels.profile_user2')
-                ->whereHas('business')
-                ->select('channels.id', DB::raw("CONCAT(obj1.name, ' - ', obj2.name) AS name"));
-        }
-
-        if($column_object == Business::class && $noAdmin ){
-            $column = $column->whereIn('id', $userDataObject->business);
-        }
         if($column_object == ObjectType::class ){
             $column = $column->where('type' , 'post');
             if($noAdmin){
@@ -103,17 +94,7 @@ class AssignmentController extends Controller {
         }
 
         if($row_object == User::class && $request['general'] ){
-            $row = $row->role('Contact')->whereHas(BUSINESS_IDENTIFY);
-        }
-        if($row_object == Channel::class){
-            $row = $row->join('objects as obj1', 'obj1.id', '=', 'channels.profile_user1')
-                ->join('objects as obj2', 'obj2.id', '=', 'channels.profile_user2')
-                ->whereHas('business')
-                ->select('channels.id', DB::raw("CONCAT(obj1.name, ' - ', obj2.name) AS name"));
-        }
-
-        if($row_object == Business::class && $noAdmin ){
-            $row = $row->whereIn('id', $userDataObject->business);
+            $row = $row->role('Contact');
         }
         if($row_object == ObjectType::class){
             $row = $row->where('type' , 'post');
@@ -132,6 +113,17 @@ class AssignmentController extends Controller {
         }, $column['data']);
         // GET ALL COLUMN NAME FOR EACH ROW
         $column['headers'] = $row->pluck('name')->toArray();
+        $column['search'] = $rq->search;
+        /* Assign Icon default */
+
+        $column['iconAssign'] = match ($column_object) {
+            NewPermission::class => "fas fa-newspaper",
+            NewRole::class => "fab fa-buromobelexperte",
+            Group::class => "fas fa-object-group",
+            User::class => "fa-solid fa-user",
+            ObjectType::class => "fa-solid fa-diagram-successor",
+            default => "fa-regular fa-circle",
+        };
         return response()->json($column);
     }
 
@@ -153,16 +145,6 @@ class AssignmentController extends Controller {
                     $role->{$relation_name} =  $the_user->hasRole($role->name);
                 });
                 break;
-            case 'role_for_business':
-                $item[$relation_name . 's'  ] = $row->get()->each(function ($business) use ($item, $relation_name){
-                    $business_exists = DB::table('model_has_business')->where([
-                        'model_type' => NewRole::class,
-                        'model_id' => $item['id'],
-                        BUSINESS_IDENTIFY => $business->id
-                    ])->exists();
-                    $business->{$relation_name} = $business_exists;
-                });
-                break;
             case 'permission_has_group':
                 $item[$relation_name . 's'  ] = $row->get()->each(function ($group) use ($item, $relation_name){
                     $group_exists = DB::table('model_has_group')->where([
@@ -180,16 +162,6 @@ class AssignmentController extends Controller {
                     $role->{$relation_name} = $the_role->permissions->contains($item['id']);
                 });
                 break;
-            case'group_has_business':
-                $item[$relation_name . 's'  ] = $row->get()->each(function ($business) use ($item, $relation_name){
-                    $group_exists = DB::table('model_has_business')->where([
-                        'model_type' => Group::class,
-                        'model_id' => $item['id'],
-                        'business' => $business->id
-                    ])->exists();
-                    $business->{$relation_name} = $group_exists;
-                });
-                break;
             case 'object_type_has_role':
                 $item[$relation_name . 's' ] = $row->get()->each(function ($role) use ($item, $relation_name){
                     //item is object type
@@ -197,50 +169,11 @@ class AssignmentController extends Controller {
                     $role->{$relation_name} = $object_type->hasRole($role->name, '');
                 });
                 break;
-            case 'channel_has_user':
-                $item[$relation_name . 's' ] = $row->get()->each(function ($user) use ($item, $relation_name){
-                    $channel = Channel::query()->where('id', $item['id'])->first();
-                    $user->{$relation_name} = $channel->intermediary == $user['id'];
-                });
-                break;
             default :
                 break;
         }
 
         return $item;
-    }
-
-    function sendNotification($channel, $bs, $title, $description, $action){
-        $devices = FCMToken::query()->whereHas('user', function ($q) use ($channel){
-            $q->where('id', $channel->intermediary);
-        })->pluck('token')->toArray();
-
-        if(count($devices) > 0){
-            Config::set('larafirebase.authentication_key', getConfigValue('GOOGLE_FIREBASE_PUBLIC'));
-
-            $notification = Notification::query()->create([
-                'name' => $title,
-                'content' => $description,
-                'type' => getConfigValue('NEW_CHANNEL_TYPE'),
-                'link' => route('chat.index', app()->getLocale()),
-            ]);
-
-            $notification->users()->sync([$channel->intermediary]);
-            $notification->business()->syncWithPivotValues($bs, ['model_type' => Notification::class]);
-
-            $nt = Notification::query()->where('id', $notification->id)->with(['images', 'type'])->first();
-            $nt->images = [];
-
-            Larafirebase::withTitle($notification->name)
-                ->withBody($notification->content)
-                ->withClickAction($notification->link)
-                ->withPriority('high')->withAdditionalData([
-                    'notification' => $nt->toArray(),
-                    'channel' => $channel->toArray(),
-                    'state' => 'channel',
-                    'action' => $action
-                ])->sendNotification($devices);
-        }
     }
 
     /**
@@ -268,14 +201,6 @@ class AssignmentController extends Controller {
                         $column->removeRole($role->name);
                     }
                     break;
-                case 'role_for_business':
-                    $column = NewRole::find($column);
-                    if($type ){
-                        $column->business()->attach($row, ['model_type' => NewRole::class]);
-                    }else{
-                        $column->business()->detach($row, ['model_type' => NewRole::class]);
-                    }
-                    break;
                 case 'permission_has_group':
                     $column = NewPermission::find($column);
                     if($type){
@@ -293,14 +218,6 @@ class AssignmentController extends Controller {
                         $row->revokePermissionTo($column->name);
                     }
                     break;
-                case 'group_has_business':
-                    $column = Group::find($column);
-                    if($type){
-                        $column->business()->attach($row, ['model_type' => Group::class]);
-                    }else{
-                        $column->business()->detach($row, ['model_type' => Group::class]);
-                    }
-                    break;
                 case 'object_type_has_role':
                     if($type){
                         DB::table('model_has_roles')->insert([
@@ -315,36 +232,6 @@ class AssignmentController extends Controller {
                             'model_id' =>$column
                         ])->delete();
                     }
-                    break;
-                case 'channel_has_user':
-                    //$channel = Channel::query()->where('id', $column)
-                    //    ->with([BUSINESS_IDENTIFY, 'user1', 'user2', 'intermediary'])
-                    //    ->with('profile_user1', function ($u){
-                    //        $u->with('images');
-                    //    })
-                    //    ->with('profile_user2', function ($u){
-                    //        $u->with('images');
-                    //    })
-                    //    ->with('messages', function($m){
-                    //        $m->where('is_last', true)->first();
-                    //    })->first();
-
-                    $channel = Channel::query()->where('id', $column)->first();
-                    $bs = Business::query()->where('code', session(BUSINESS_IDENTIFY))->first();
-
-                    if($type){
-                        $channel->intermediary = $row;
-                        $description = __("New conversation in progress") . " ". $channel->name;
-                        $this->sendNotification($channel, $bs->id, __('New channel assigned'), $description, 1);
-
-                    }else{
-                        $description = __("Intermediary was removed") . " ". $channel->name;
-                        $this->sendNotification($channel, $bs->id, __('Unassigned channel'), $description, 0);
-                        $channel->intermediary = null;
-                    }
-                    $channel->save();
-                    break;
-                default:
                     break;
             }
             DB::commit();

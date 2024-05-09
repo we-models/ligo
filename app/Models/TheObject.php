@@ -3,19 +3,20 @@
 namespace App\Models;
 
 use App\Interfaces\BaseModelInterface;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use App\Properties\Prop;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use Spatie\Activitylog\Models\Activity;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
+use PhpParser\Node\Expr\Cast\Object_;
 
 class TheObject extends BaseModel implements BaseModelInterface
 {
     /**
      * @var string[]
      */
-    public $fillable = ['name',  'description','excerpt', 'object_type', 'visible', 'owner', 'parent', 'wp_id'];
+    public $fillable = ['name',  'description','excerpt', 'object_type', 'visible', 'parent', 'internal_id'];
 
     /**
      * @var string
@@ -25,7 +26,7 @@ class TheObject extends BaseModel implements BaseModelInterface
     /**
      * @var array|string[]
      */
-    public array $sortable = ['name', 'description', 'excerpt', 'visible', 'owner', 'parent', 'created_at'];
+    public array $sortable = ['name', 'description', 'excerpt', 'visible', 'parent', 'created_at', 'internal_id'];
 
     protected $hidden = ['updated_at', 'deleted_at'];
 
@@ -41,98 +42,70 @@ class TheObject extends BaseModel implements BaseModelInterface
     }
 
     /**
+     * @return array
+     */
+    public function getPermissionsForModel(): array {
+        $p = [];
+        if(!Auth::check()) return $p;
+        $results = $this->query;
+        if(empty($results)) return requestPermission($this->singular);
+
+
+        $querySeparate = explode('&', $results);
+
+        $searchObjectType = array_filter($querySeparate, fn($element) => str_contains($element, "object_type="));
+
+        $searchObjectType = reset($searchObjectType);
+
+        $results = [];
+
+        if (!empty($searchObjectType)) {
+           $results = explode('=',$searchObjectType);
+        }
+
+
+        $results_location = array_search('object_type',$results);
+        if($results_location === false) return requestPermission($this->singular);
+
+        $object_type = ObjectType::find($results[$results_location + 1]) ;
+        foreach (DEFAULT_PERMISSIONS as $c){
+            if(Auth::user()->can($object_type->slug . $c)) $p[] = $c;
+        }
+
+        return $p;
+    }
+
+    /**
      * @param bool $self
      * @return array
      */
-    public function getFields(bool $self = false) : array
+    public function getFields(bool $self = false,array $keysToExclude = []) : array
     {
-        $has_business = self::getCurrentBusiness() != null;
         $response = [
-            'name' => [
-                'properties' => ['width' => 5, 'label' => __('Name')],
-                'attributes' => ['type' => 'text', 'minlength' => 1, 'required' => true, 'class' => 'form-control']
-            ],
-            'object_type' => [
-                'properties' => ['width' => 4, 'label' => __('Object type')],
-                'attributes' => [
-                    'type' => 'object',
-                    'readonly'=> 'true',
-                    'name' =>'object_type',
-                    'required' => true,
-                    'multiple' => false ,
-                    'data' => (new ObjectType())->publicAttributes()
-                ]
-            ],
-            'visible' => [
-                'properties' => ['width' => 3, 'label' => __('Visible') ],
-                'attributes' => ['type' => 'checkbox', 'class' => 'form-check-input']
-            ],
-            'excerpt' => [
-                'properties' => ['width' => 7, 'label' => __('Excerpt')],
-                'attributes' => ['type' => 'text' , 'class' => 'form-control']
-            ],
-            'owner' => [
-                'properties' => ['width' => 5, 'label' => __('Owner')],
-                'attributes' => [
-                    'type' => 'object',
-                    'name' =>'owner',
-                    'required' => false,
-                    'multiple' => false ,
-                    'data' => (new User())->publicAttributes()
-                ]
-            ],
-            'description' => [
-                'properties' => ['width' => 12, 'label' => __('Description')],
-                'attributes' => ['type' => 'textarea']
-            ],
+            (new Prop('name', 'Name', [], 3,true))->textInput(),
+            (new Prop('object_type', 'Object type', [], 3,true))->objectInput(new ObjectType(),false,[],['readonly'=> 'true']),
 
-            'images' => [
-                'properties' => ['width' => 6, 'label' => __('Image')],
-                'attributes' => [
-                    'type' => 'image',
-                    'name' =>'image',
-                    'required' => false,
-                    'multiple' => false ,
-                    'data' => (new ImageFile())->publicAttributes()
-                ]
-            ],
         ];
 
-        if($self){
-            $response = array_merge($response, [
-                'parent' => [
-                    'properties' => ['width' => 6, 'label' => __('Parent')],
-                    'attributes' => [
-                        'type' => 'object',
-                        'name' =>'parent',
-                        'required' => false,
-                        'multiple' => false ,
-                        'data' => (new TheObject($this->query))->publicAttributes()
-                    ]
-                ],
+        if (!in_array("description",$keysToExclude)) {
+            $response = array_merge($response,[
+                (new Prop('description', 'Description', [],3,false))->textAreaInput()
             ]);
         }
 
-        if($has_business){
-            $response = array_merge($response, [
-                'business' => [
-                    'properties' => ['width' => 12, 'label' => __('Business')],
-                    'attributes' => [
-                        'type' => 'object',
-                        'name' =>'business',
-                        'required' => true,
-                        'multiple' => false ,
-                        'data' => (new Business())->publicAttributes()
-                    ]
-                ],
+        if (!in_array("images",$keysToExclude)) {
+            $response = array_merge($response,[
+                (new Prop('images', 'Image', [],3,false))->imageInput()
             ]);
         }
-        return $response;
+
+        return $this->getMergedFields($response);
     }
 
 
+
     /**
-     * @param $parameters
+     * @param string $parameters
      * @return array
      */
     public static function newObject(string $parameters = "") : array
@@ -147,18 +120,34 @@ class TheObject extends BaseModel implements BaseModelInterface
             }
         }
 
-        return [
-            'id' =>0,
-            'name' => '',
-            'visible' => true,
-            'description' => "",
+        /* Generate name */
+        $name = null;
+
+        if($object_type && $object_type->autogenerated_name){
+            $name = self::generateDynamicName($object_type->id,$object_type->prefix);
+        }
+        if($object_type && $object_type->autogenerated_name === 0 && $object_type->editable_name === 0){
+            $name = self::newId($object_type->id);
+        }
+
+        $newObject = [
+            'id' => 0,
+            'internal_id' => 0,
+            'name' => $name ?? '',
+            'description' => '',
             'object_type' => $object_type,
-            'excerpt' => "",
             'images' => null,
-            'owner' => null,
-            'parent' => null,
-            'business' => self::getCurrentBusiness(),
         ];
+
+        /* Do not show the description or image columns if they are disabled. */
+        if (isset($object_type) && $object_type->show_description === 0) {
+            unset($newObject['description']);
+        }
+        if (isset($object_type) && $object_type->show_image === 0) {
+            unset($newObject['images']);
+        }
+
+        return $newObject;
     }
 
     /**
@@ -193,21 +182,13 @@ class TheObject extends BaseModel implements BaseModelInterface
             'relation')->withPivot(['relation_object'])->withTimestamps();
     }
 
-    public function value_for_relation(){
+    public function value_for_relation(): BelongsToMany
+    {
         return $this->belongsToMany(
             TheObject::class,
             'object_relations',
             'relation',
             'object')->withPivot(['relation_object'])->withTimestamps();
-    }
-
-    /**
-     * @return BelongsToMany
-     */
-    public function business(): BelongsToMany
-    {
-        if( auth()->user()->hasAnyRole(ALL_ACCESS))  return $this->all_business();
-        return $this->all_business()->where('code', '=',  session(BUSINESS_IDENTIFY));
     }
 
     /**
@@ -226,7 +207,15 @@ class TheObject extends BaseModel implements BaseModelInterface
         return $this->hasOne(TheObject::class, 'id', 'parent');
     }
 
-    public function comments(): HasMany{
-        return $this->hasMany(Comment::class, 'object', 'id');
+    public static function newId($object_type){
+        $internalID = TheObject::where('object_type',$object_type)->max('internal_id');
+        return $internalID ==  null ? 1 : ($internalID + 1);
+    }
+
+    public static function generateDynamicName(int $idObjectType,string $prefixObjectType)
+    {
+        $internalID =  self::newId($idObjectType);
+
+        return $prefixObjectType . "-" . $internalID;
     }
 }

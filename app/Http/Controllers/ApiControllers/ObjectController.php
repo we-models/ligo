@@ -3,12 +3,10 @@
 namespace App\Http\Controllers\ApiControllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\Business;
 use App\Models\Field;
 use App\Models\ObjectType;
 use App\Models\ObjectTypeRelation;
 use App\Models\TheObject;
-use App\Repositories\BusinessRepository;
 use App\Repositories\LogRepository;
 use App\Repositories\ObjectRepository;
 use DateTime;
@@ -26,11 +24,6 @@ class ObjectController extends Controller
     public ObjectRepository $objectRepository;
 
     /**
-     * @var BusinessRepository
-     */
-    public BusinessRepository $businessRepository;
-
-    /**
      * @var LogRepository
      */
     private LogRepository $logRepository;
@@ -38,10 +31,9 @@ class ObjectController extends Controller
     /**
      * @param ObjectRepository $objectRepo
      */
-    public function __construct(ObjectRepository $objectRepo, BusinessRepository $businessRepo, LogRepository $logRepo)
+    public function __construct(ObjectRepository $objectRepo, LogRepository $logRepo)
     {
         $this->objectRepository = $objectRepo;
-        $this->businessRepository = $businessRepo;
         $this->logRepository = $logRepo;
         define('RV', 'relation_value');
         define('FV', 'field_value');
@@ -86,7 +78,7 @@ class ObjectController extends Controller
                     }
                 });
             }
-        })->whereHas(BUSINESS_IDENTIFY);
+        });
 
 
         if($conditions != ''){
@@ -104,13 +96,12 @@ class ObjectController extends Controller
         $objects = $objects->sortable()->paginate($rq->paginate)->toArray();
 
         if(isset($input['get_fields'])){
-           if($input['get_fields'] == 0) return $objects;
+            if($input['get_fields'] == 0) return $objects;
         }
 
         $objects['data'] = array_map(fn ($object) => array_filter($object, fn ($v) => $v !== null), $objects['data']);
 
         $objects['data'] = array_map(function($object){
-            unset ($object[BUSINESS_IDENTIFY]);
             $object['custom_fields'] = getCustomFieldsRelations(
                 "object_type=" . $object['object_type']['id'],
                 $this,
@@ -129,10 +120,6 @@ class ObjectController extends Controller
     public function all(Request $request){
 
         try{
-
-            $request[BUSINESS_IDENTIFY] = request()->header(BUSINESS_IDENTIFY);
-            session([BUSINESS_IDENTIFY =>  $request[BUSINESS_IDENTIFY]]);
-
             return response()->json($this->getObjects($request));
 
         }catch (\Throwable $error){
@@ -291,15 +278,10 @@ class ObjectController extends Controller
     public function store(Request $request){
         set_time_limit(180);
 
-        session([BUSINESS_IDENTIFY =>  request()->header(BUSINESS_IDENTIFY)]);
-        $bs = request()->header(BUSINESS_IDENTIFY);
-        $bs = Business::query()->where('code', $bs )->first();
-        $bs = $bs->id;
-
         $data = $request->all();
         try {
             DB::beginTransaction();
-            $object = $this->saveObject($data, $bs);
+            $object = $this->saveObject($data);
             $object = $this->setNewObject($object);
             $this->saveManipulation($object);
 
@@ -317,7 +299,7 @@ class ObjectController extends Controller
     /**
      * @throws GuzzleException
      */
-    function saveObject($data, $bs){
+    function saveObject($data){
         $owner = auth()->user()->getAuthIdentifier();
 
         if($data['id'] == 0){
@@ -344,20 +326,18 @@ class ObjectController extends Controller
             }, $data['images']);
             $object->images()->syncWithPivotValues($images, ['model_type' => TheObject::class]);
         }
-        //Set Business to object
-        $object->business()->syncWithPivotValues($bs, ['model_type' => TheObject::class]);
 
         foreach ($data['custom_fields'] as $cf){
             if(isset($cf['layout']) && $cf['layout'] == 'tab'){
-                array_map(fn($field_relation) => $this->setCustomFieldsRelations($object, $field_relation, $bs), $cf['fields']);
+                array_map(fn($field_relation) => $this->setCustomFieldsRelations($object, $field_relation), $cf['fields']);
             }else{
-                $this->setCustomFieldsRelations($object, $cf, $bs);
+                $this->setCustomFieldsRelations($object, $cf);
             }
         }
         return $object;
     }
 
-    public function setCustomFieldsRelations($object, $field_relation, $bs){
+    public function setCustomFieldsRelations($object, $field_relation){
         //If object has fields. Then fill them
         if($field_relation['status'] == 'field'){
 
@@ -386,17 +366,17 @@ class ObjectController extends Controller
                 $relations = $field_relation['entity']['id'];
                 if($relations == 0 && in_array($field_relation['filling_method'], ['creation', 'all'])){
                     //If object relation not exists create;
-                    $obj = $this->saveObject($field_relation['entity'], $bs);
+                    $obj = $this->saveObject($field_relation['entity']);
                     $obj = $this->setNewObject($obj);
                     $relations = [$obj->id];
                     $this->saveManipulation($obj);
 
                 }
             }else{
-                $relations  = array_map(function($rl) use($bs, $field_relation){
+                $relations  = array_map(function($rl) use($field_relation){
                     if($rl['id'] == 0 && in_array($field_relation['filling_method'], ['creation', 'all'])){
                         //If object relation not exists create
-                        $rl = $this->saveObject($rl, $bs);
+                        $rl = $this->saveObject($rl);
                         $rl = $this->setNewObject($rl);
                         $this->saveManipulation($rl);
                         $rl = $rl->toArray();
@@ -435,7 +415,6 @@ class ObjectController extends Controller
     public function getTabs(Request $request): \Illuminate\Http\JsonResponse
     {
         try{
-            session([BUSINESS_IDENTIFY =>  request()->header(BUSINESS_IDENTIFY)]);
             $rq = getRequestParams($request);
 
             $rq->object_type =  $request['object_type'];
@@ -446,7 +425,6 @@ class ObjectController extends Controller
             $tabs = Field::query()
                 ->where([
                     'layout' => 'tab',
-                    'visible_in_app' => true,
                     'object_type' => $objectType->id
                 ])
                 ->orderBy('order', 'ASC')
@@ -464,7 +442,6 @@ class ObjectController extends Controller
 
     public function getNew(Request $request){
         try{
-            session([BUSINESS_IDENTIFY =>  request()->header(BUSINESS_IDENTIFY)]);
             $rq = getRequestParams($request);
 
             $rq->object_type =  $request['object_type'];
@@ -472,7 +449,6 @@ class ObjectController extends Controller
 
             $newObject = new TheObject();
             $newObject = $newObject->newObject('object_type='. $objectType->id);
-            unset($newObject['business']);
             $newObject['custom_fields'] = getCustomFieldsRelations("object_type=" . $objectType->id, $this,  0, false, true);
 
             return response()->json($newObject);
@@ -487,19 +463,12 @@ class ObjectController extends Controller
 
     public function show(Request $request, $lang, $id){
         try{
-            session([BUSINESS_IDENTIFY =>  request()->header(BUSINESS_IDENTIFY)]);
-            $object = TheObject::query()->where('id', $id)
-                ->whereHas(BUSINESS_IDENTIFY)->with($this->objectRepository->includes)->first();
+            $object = TheObject::query()->where('id', $id)->with($this->objectRepository->includes)->first();
 
             if(!$object->object_type()->first()->public && $object->owner != auth()->user()->getAuthIdentifier()) {
                 throw new Exception("This user can not get the item");
             }
-
             $object = $object->toArray();
-            unset($object[BUSINESS_IDENTIFY]);
-
-
-
             $object =  array_filter($object, function ($value) {
                 return $value !== null;
             });
@@ -516,7 +485,6 @@ class ObjectController extends Controller
     }
 
     public function getAvailableTerms(Request $request){
-        session([BUSINESS_IDENTIFY =>  request()->header(BUSINESS_IDENTIFY)]);
 
         $input = $request->all();
 
@@ -637,24 +605,4 @@ class ObjectController extends Controller
         }
         return null;
     }
-
-    /*
-     if (is_array($value)) {
-                $result = $this->findObjectByCondition($value, $conditionValue, $data);
-                if ($result !== null) return $result;
-            } else {
-                if ($key === 'slug' && $value === $conditionValue) {
-                    if (isset($data['value'])) return $data['value'];
-                    if (is_array($parent['entity'])) {
-                        $ent = array_map(function($e) {
-                            return $e['name'];
-                        }, $parent['entity']);
-                        return implode(', ', $ent);
-                    }
-                    return $parent['entity']['name'];
-                }
-            }
-     */
-
-
 }

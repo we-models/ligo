@@ -29,7 +29,6 @@ return [
     */
 
     'disks' => [
-
         'default' => [
             'driver' => 'local',
             'root' => public_path(),

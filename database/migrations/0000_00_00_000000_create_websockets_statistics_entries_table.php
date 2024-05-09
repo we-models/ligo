@@ -2,10 +2,12 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 class CreateWebSocketsStatisticsEntriesTable extends Migration
 {
+
     /**
      * Run the migrations.
      *
@@ -13,7 +15,9 @@ class CreateWebSocketsStatisticsEntriesTable extends Migration
      */
     public function up()
     {
-        Schema::create('websockets_statistics_entries', function (Blueprint $table) {
+
+        $tables = config('database.tables');
+        Schema::create( $tables['WE_ST_EN']['table'], function (Blueprint $table) {
             $table->increments('id');
             $table->string('app_id');
             $table->integer('peak_connection_count');
@@ -30,6 +34,7 @@ class CreateWebSocketsStatisticsEntriesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('websockets_statistics_entries');
+        $tables = config('database.tables');
+        Schema::dropIfExists($tables['WE_ST_EN']['table']);
     }
 }

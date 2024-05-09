@@ -1,0 +1,28 @@
+.interface_loader {
+    border: 16px solid var(--secondary); /* Light grey */
+    border-top: 16px solid var(--accent); /* Blue */
+    border-radius: 50%;
+    width: 120px;
+    height: 120px;
+    animation: interface_spin 2s linear infinite;
+    margin: 0 auto;
+}
+
+@keyframes interface_spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .interface_loader {
+        width: 40px;
+        height: 40px;
+        border: 4px solid var(--secondary); /* Light grey */
+        border-top: 4px solid var(--accent); /* Blue */
+    }
+
+}

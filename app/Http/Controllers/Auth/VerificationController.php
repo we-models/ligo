@@ -3,11 +3,12 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use App\Providers\RouteServiceProvider;
+use Illuminate\Foundation\Auth\VerifiesEmails;
+
+use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\Events\Verified;
-use Illuminate\Foundation\Auth\VerifiesEmails;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
@@ -42,7 +43,7 @@ class VerificationController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth')->except('verify');
+        $this->middleware('auth');
         $this->middleware('signed')->only('verify');
         $this->middleware('throttle:6,1')->only('verify', 'resend');
     }
@@ -57,7 +58,6 @@ class VerificationController extends Controller
      */
     public function verify(Request $request, String $lang)
     {
-        $is_app = isset($request['origin']) && $request['origin'] == 1;
 
         $user = $request->route('id');
         $user = User::find($user);
@@ -70,7 +70,7 @@ class VerificationController extends Controller
         }
 
         if ($user->hasVerifiedEmail()) {
-            return $is_app ? Redirect::to(APP_URL) : redirect($this->redirectPath());
+            return redirect($this->redirectPath());
         }
 
         if ($user->markEmailAsVerified()) event(new Verified($request->user()));
@@ -78,6 +78,6 @@ class VerificationController extends Controller
         if ($response = $this->verified($request)) return $response;
 
 
-        return $is_app ? Redirect::to(APP_URL) : Redirect::route('login', app()->getLocale());
+        return Redirect::route('login', app()->getLocale());
     }
 }

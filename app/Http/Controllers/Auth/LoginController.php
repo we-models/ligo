@@ -3,15 +3,18 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use App\Models\User;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Auth\Events\Registered;
-use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Routing\Redirector;
+
 
 class LoginController extends Controller
 {
@@ -31,7 +34,7 @@ class LoginController extends Controller
     /**
      * Where to redirect users after login.
      *
-     * @var string
+     * @return string
      */
     public function redirectTo()
     {
@@ -47,7 +50,6 @@ class LoginController extends Controller
     {
         $this->middleware('guest')->except('logout');
     }
-    
     public function login(Request $request)
     {
         $this->validateLogin($request);
@@ -63,11 +65,16 @@ class LoginController extends Controller
         }
 
         $user =User::query()->where('email', $request['email'])->first();
-        if($user != null && !$user->hasVerifiedEmail()){
-            setEmailConfiguration();
-            event(new Registered( $user));
+
+
+        // check if the email exists
+        if (!$user) {
+            return $this->sendFailedLoginResponse($request);
+        }
+
+        if(!$user->enable){
             return throw ValidationException::withMessages([
-                $this->username() => [trans('user not verified')],
+                $this->username() => [trans('user disabled')],
             ]);
         }
 
@@ -86,4 +93,15 @@ class LoginController extends Controller
 
         return $this->sendFailedLoginResponse($request);
     }
+
+     /**
+      * Log out user
+      *
+     * @return RedirectResponse
+     */
+    public function logout():RedirectResponse {
+        Auth::logout();
+        return redirect(route('login', app()->getLocale()));
+    }
+
 }

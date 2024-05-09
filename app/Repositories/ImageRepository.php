@@ -18,19 +18,13 @@ class ImageRepository extends BaseRepository implements BaseRepositoryInterface
         'height',
         'width' ,
         'size',
-        'extension',
-        'visibility',
-        'thumbnail',
-        'small',
-        'medium',
-        'large',
-        'xlarge'
+        'extension'
     ];
 
     /**
      * @var array
      */
-    public  array $includes = ['business', 'user'];
+    public  array $includes = ['user'];
 
     /**
      * @return array

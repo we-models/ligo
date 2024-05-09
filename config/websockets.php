@@ -1,8 +1,8 @@
 <?php
 
+use BeyondCode\LaravelWebSockets\Dashboard\Http\Middleware\Authorize;
 use App\Http\Middleware\Authenticate;
 use App\Http\Middleware\RolesAdmin;
-use BeyondCode\LaravelWebSockets\Dashboard\Http\Middleware\Authorize;
 
 return [
 
@@ -29,8 +29,9 @@ return [
             'name' => env('APP_NAME'),
             'key' => env('PUSHER_APP_KEY'),
             'secret' => env('PUSHER_APP_SECRET'),
+            'path' => env('PUSHER_APP_PATH'),
             'capacity' => null,
-            'enable_client_messages' => true,
+            'enable_client_messages' => false,
             'enable_statistics' => true,
             'encrypted' => env('PUSHER_SCHEME', 'https') === 'https',
         ],
@@ -61,7 +62,7 @@ return [
     /*
      * This path will be used to register the necessary routes for the package.
      */
-    'path' => 'admin/laravel-websockets',
+    'path' => 'laravel-websockets',
 
     /*
      * Dashboard Routes Middleware
@@ -132,10 +133,6 @@ return [
          * Passphrase for your local_cert file.
          */
         'passphrase' => env('LARAVEL_WEBSOCKETS_SSL_PASSPHRASE', null),
-
-        'verify_peer' => false,
-
-        'allow_self_signed' => true,
     ],
 
     /*

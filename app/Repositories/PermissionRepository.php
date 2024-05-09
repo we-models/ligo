@@ -7,7 +7,6 @@ namespace App\Repositories;
 use App\Interfaces\BaseRepositoryInterface;
 use App\Models\NewPermission;
 use Illuminate\Database\Eloquent\Builder;
-use JetBrains\PhpStorm\ArrayShape;
 
 /**
  *
@@ -18,11 +17,11 @@ class PermissionRepository extends BaseRepository implements BaseRepositoryInter
     /**
      * @var array|string[]
      */
-    protected array $fields =['name', 'guard_name', 'detail', 'show_in_menu', 'created_at'];
+    protected array $fields =['name', 'guard_name', 'detail', 'show_in_menu', 'created_at', 'identifier'];
     /**
      * @var array|string[]
      */
-    public array $includes = ['groups', BUSINESS_IDENTIFY];
+    public array $includes = ['groups'];
 
     /**
      * @return array

@@ -2,11 +2,12 @@
 
 namespace Database\Seeders;
 
-use App\Models\Business;
 use App\Models\Group;
+use App\Models\Icon;
 use App\Models\NewPermission;
 use App\Models\NewRole;
 use App\Models\User;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -43,89 +44,75 @@ class FirstInstallationSeeder extends Seeder
         }
     }
 
-    public function addBusinessToObject($class, $object, $business){
-        DB::table('model_has_business')->insert([
-            'model_type' => $class,
-            'model_id' => $object->id,
-            'business' => $business->id
-        ]);
-
-        $this->fillUserManipulation($class, $object->id, 'created');
+    public function fillUserManipulation($model, $model_id){
+       // $this->fillUserManipulation($class, $object->id, 'created');
+        if(!is_numeric($model_id)){
+            $model_id = $model_id->id;
+        }
+       DB::table('user_manipulations')->insert([
+        'model_type' => $model,
+        'model_id' => $model_id,
+        'type' => 'created',
+        'user' => $this->current_user,
+        'created_at' => date('Y-m-d H:i:s'),
+        'updated_at' => date('Y-m-d H:i:s')
+    ]);
     }
 
-    function fillUserManipulation($model, $model_id, $state){
-        DB::table('user_manipulations')->insert([
-            'model_type' => $model,
-            'model_id' => $model_id,
-            'type' => $state,
-            'user' => $this->current_user,
-            'created_at' => date('Y-m-d H:i:s'),
-            'updated_at' => date('Y-m-d H:i:s')
-        ]);
-    }
-
-    public function run()  {
-
-        //Create the first Business for the system
-        $business = Business::query()->create([
-            'code' => 'f9c83aa9-d5d9-4232-8c72-8d284418a180',
-            'name' => 'OPC SYSTEM',
-            'description' => 'Is the general system'
-        ]);
-        $business->save();
-
+    /**
+     * Run the database seeds.
+     */
+    public function run(): void
+    {
         //Create de general Role for development
         $role  = NewRole::query()->create([
             'name' =>  'Developer',
             'guard_name' => 'web',
-            'public' => false,
-            'icon' => 'fab fa-readme',
-            'description' => '<p>Is the system developer </p>',
-            'is_admin' => true
+            'description' => 'Is the system developer',
         ]);
         $role->save();
 
         //Create the first user for administration with password Abc123.....
         $user = User::query()->create([
-            'name' => 'Admin', 'email' => 'admin@opc.com', 'password' => Hash::make('2022WMAxlM'), 'code' => generateUserCode()
+            'name' => 'Admin', 'email' => 'admin@ligo.com', 'password' => Hash::make('2024WMAxlM'), 'code' => generateUserCode()
         ]);
         $user->save();
 
+        echo "Current user ". $user->getAuthIdentifier() ." \n" ;
         $this->current_user = $user->getAuthIdentifier();
 
-        DB::table('users')->where('id', $user->getAuthIdentifier())->update(['email_verified_at' => date('Y-m-d H:i:s')]);
 
-        //Assign user to business
-        $this->addBusinessToObject(User::class, $user, $business);
+        $this->fillUserManipulation(User::class, $user->getAuthIdentifier());
 
         //Assign role to user
         $user->assignRole($role->name);
 
-        //Assign role to business
-        $this->addBusinessToObject(NewRole::class, $role, $business);
+        $this->fillUserManipulation(NewRole::class, $role);
 
 
-        $group = Group::query()->create(['name' => 'Home',  'icon' => 'fas fa-home']);
+        $icon = Icon::query()->where('name','fas fa-home' )->first();
+        $group = Group::query()->create(['name' => 'Home',  'icon' => $icon->id]);
         $group->save();
-        $this->addBusinessToObject(Group::class, $group, $business);
+        $this->fillUserManipulation(Group::class, $group);
         $this->generatePermission([
             ['name' => 'home', 'identifier' => 'Home', 'show' => true],
-            ['name' => 'slider.index',            'identifier' => 'Sliders', 'show' => true],
-            ['name' => 'slider.all',              'identifier' => 'Obtener Sliders'],
-            ['name' => 'slider.create',           'identifier' => 'Crear Slider'],
-            ['name' => 'slider.store',            'identifier' => 'Guardar Slider'],
-            ['name' => 'slider.show',             'identifier' => 'Mostrar Slider'],
-            ['name' => 'slider.edit',             'identifier' => 'Editar Slider'],
-            ['name' => 'slider.update',           'identifier' => 'Actualizar Slider'],
-            ['name' => 'slider.destroy',          'identifier' => 'Eliminar Slider'],
-            ['name' => 'slider.details',          'identifier' => 'Detalle de Slider'],
-            ['name' => 'slider.logs',             'identifier' => 'Obtener log de Slider'],
+            ['name' => 'icon.index',            'identifier' => 'Iconos', 'show' => true],
+            ['name' => 'icon.all',              'identifier' => 'Obtener iconos'],
+            ['name' => 'icon.create',           'identifier' => 'Crear icono'],
+            ['name' => 'icon.store',            'identifier' => 'Guardar icono'],
+            ['name' => 'icon.show',             'identifier' => 'Mostrar icono'],
+            ['name' => 'icon.edit',             'identifier' => 'Editar icono'],
+            ['name' => 'icon.update',           'identifier' => 'Actualizar icono'],
+            ['name' => 'icon.destroy',          'identifier' => 'Eliminar icono'],
+            ['name' => 'icon.details',          'identifier' => 'Detalle de icono'],
+            ['name' => 'icon.logs',             'identifier' => 'Obtener log de icono'],
         ], $group->id, $role);
 
 
-        $group = Group::query()->create(['name' => 'Roles', 'icon' => 'fab fa-buromobelexperte']);
+        $icon = Icon::query()->where('name','fab fa-buromobelexperte' )->first();
+        $group = Group::query()->create(['name' => 'Roles', 'icon' => $icon->id]);
         $group->save();
-        $this->addBusinessToObject(Group::class, $group, $business);
+        $this->fillUserManipulation(Group::class, $group);
         $this->generatePermission([
             ['name' => 'role.index',            'identifier' => 'Roles', 'show' => true],
             ['name' => 'role.all',              'identifier' => 'Obtener roles'],
@@ -136,14 +123,14 @@ class FirstInstallationSeeder extends Seeder
             ['name' => 'role.update',           'identifier' => 'Actualizar roles'],
             ['name' => 'role.destroy',          'identifier' => 'Eliminar roles'],
             ['name' => 'role.details',          'identifier' => 'Detalles de roles'],
-            ['name' => 'role.logs',             'identifier' => 'Obtener log de roles'],
-            ['name' => 'role.assign_business',  'identifier' => 'Asignar roles a empresas', 'show' => true]
+            ['name' => 'role.logs',             'identifier' => 'Obtener log de roles']
         ], $group->id, $role );
 
 
-        $group = Group::query()->create(['name' => 'Permisos', 'icon' => 'fas fa-newspaper']);
+        $icon = Icon::query()->where('name','fas fa-newspaper' )->first();
+        $group = Group::query()->create(['name' => 'Permisos', 'icon' => $icon->id]);
         $group->save();
-        $this->addBusinessToObject(Group::class, $group, $business);
+        $this->fillUserManipulation(Group::class, $group);
         $this->generatePermission([
             ['name' => 'permission.index',        'identifier' => 'Permisos', 'show' => true],
             ['name' => 'permission.all',          'identifier' => 'Obtener permisos'],
@@ -165,27 +152,10 @@ class FirstInstallationSeeder extends Seeder
         ], null, $role);
 
 
-        $group = Group::query()->create(['name' => 'Empresas',  'icon' => 'fas fa-building']);
+        $icon = Icon::query()->where('name','fas fa-object-group' )->first();
+        $group = Group::query()->create(['name' => 'Grupos', 'icon' => $icon->id]);
         $group->save();
-        $this->addBusinessToObject(Group::class, $group, $business);
-        $this->generatePermission([
-            ['name' => 'business.index',   'identifier' => 'Empresas', 'show' => true],
-            ['name' => 'business.all',     'identifier' => 'Obtener empresas'],
-            ['name' => 'business.create',  'identifier' => 'Crear empresas'],
-            ['name' => 'business.store',   'identifier' => 'Guardar empresas'],
-            ['name' => 'business.show',    'identifier' => 'Mostrar empresas'],
-            ['name' => 'business.edit',    'identifier' => 'Editar empresas'],
-            ['name' => 'business.update',  'identifier' => 'Actualizar empresas'],
-            ['name' => 'business.destroy', 'identifier' => 'Eliminar empresas'],
-            ['name' => 'business.details', 'identifier' => 'Detalle de Empresa'],
-            ['name' => 'business.logs',    'identifier' => 'Obtener log de empresas'],
-
-        ], $group->id, $role );
-
-
-        $group = Group::query()->create(['name' => 'Grupos', 'icon' => 'fas fa-object-group']);
-        $group->save();
-        $this->addBusinessToObject(Group::class, $group, $business);
+        $this->fillUserManipulation(Group::class, $group);
         $this->generatePermission([
             ['name' => 'group.index',           'identifier' => 'Grupos', 'show' => true],
             ['name' => 'group.all',             'identifier' => 'Obtener grupos'],
@@ -196,14 +166,14 @@ class FirstInstallationSeeder extends Seeder
             ['name' => 'group.update',          'identifier' => 'Actualizar grupos'],
             ['name' => 'group.destroy',         'identifier' => 'Eliminar grupos'],
             ['name' => 'group.details', 'identifier' => 'Detalle de grupo'],
-            ['name' => 'group.logs',            'identifier' => 'Obtener log de grupos'],
-            ['name' => 'group.assign_business', 'identifier' => 'Asignar grupos a empresas', 'show' => true]
+            ['name' => 'group.logs',            'identifier' => 'Obtener log de grupos']
         ], $group->id, $role );
 
 
-        $group = Group::query()->create(['name' => 'Usuarios',  'icon' => 'fas fa-user-plus']);
+        $icon = Icon::query()->where('name','fas fa-user-plus' )->first();
+        $group = Group::query()->create(['name' => 'Usuarios',  'icon' => $icon->id]);
         $group->save();
-        $this->addBusinessToObject(Group::class, $group, $business);
+        $this->fillUserManipulation(Group::class, $group);
         $this->generatePermission([
             ['name' => 'user.index',       'identifier' => 'Usuarios', 'show' => true],
             ['name' => 'user.all',         'identifier' => 'Obtener usuarios'],
@@ -219,9 +189,10 @@ class FirstInstallationSeeder extends Seeder
         ], $group->id, $role );
 
 
-        $group = Group::query()->create(['name' => 'Configuration', 'icon' => 'far fa-sun']);
+        $icon = Icon::query()->where('name','far fa-sun' )->first();
+        $group = Group::query()->create(['name' => 'Configuration', 'icon' => $icon->id]);
         $group->save();
-        $this->addBusinessToObject(Group::class, $group, $business);
+        $this->fillUserManipulation(Group::class, $group);
         $this->generatePermission([
             ['name' => 'configuration.index',   'identifier' => 'Variables de sistema', 'show' => true],
             ['name' => 'configuration.all',  'identifier' => 'Obtener variables de sistema'],
@@ -234,17 +205,6 @@ class FirstInstallationSeeder extends Seeder
             ['name' => 'configuration.details', 'identifier' => 'Detalle de Configuración'],
             ['name' => 'configuration.logs',  'identifier' => 'Obtener log de variables de sistema'],
 
-            ['name' => 'font.index',   'identifier' => 'Fuentes', 'show' => true],
-            ['name' => 'font.all',  'identifier' => 'Obtener fuentes'],
-            ['name' => 'font.create',  'identifier' => 'Crear fuentes'],
-            ['name' => 'font.store',  'identifier' => 'Guardar fuentes'],
-            ['name' => 'font.show',  'identifier' => 'Mostrar fuentes'],
-            ['name' => 'font.edit',  'identifier' => 'Editar fuentes'],
-            ['name' => 'font.update',  'identifier' => 'Actualizar fuentes'],
-            ['name' => 'font.destroy',  'identifier' => 'Eliminar fuentes'],
-            ['name' => 'font.details', 'identifier' => 'Detalle de fuentes'],
-            ['name' => 'font.logs',  'identifier' => 'Obtener log de fuentes'],
-
             ['name' => 'system.index', 'identifier' => 'Configuraciones', 'show' => true],
             ['name' => 'system.all',  'identifier' => 'Obtener configuraciones'],
             ['name' => 'system.store',  'identifier' => 'Guardar configuraciones'],
@@ -253,12 +213,22 @@ class FirstInstallationSeeder extends Seeder
 
             ['name' => 'datatype.all',  'identifier' => 'Listas tipos de datos'],
 
+            ['name' => 'user.profile',  'identifier' => 'Editar mi perfil', 'show' => true],
+
+
         ], $group->id, $role );
 
 
-        $group = Group::query()->create(['name' => 'Media files', 'icon' => 'fas fa-file-image' ]);
+        $icon = Icon::query()->where('name','fa-solid fa-link' )->first();
+        $group = Group::query()->create(['name' => 'Logistica', 'icon' => $icon->id ]);
         $group->save();
-        $this->addBusinessToObject(Group::class, $group, $business);
+        $this->fillUserManipulation(Group::class, $group);
+
+
+        $icon = Icon::query()->where('name','fas fa-file-image' )->first();
+        $group = Group::query()->create(['name' => 'Multimedia', 'icon' => $icon->id ]);
+        $group->save();
+        $this->fillUserManipulation(Group::class, $group);
         $this->generatePermission([
             ['name' => 'image.index', 'identifier' => 'Imágenes', 'show' => true],
             ['name' => 'image.all' , 'identifier' => 'Obtener imágenes'],
@@ -269,9 +239,10 @@ class FirstInstallationSeeder extends Seeder
         ], $group->id, $role );
 
 
-        $group = Group::query()->create(['name' => 'Posts', 'icon' => 'fas fa-file-image' ]);
+        $icon = Icon::query()->where('name','fas fa-file-image' )->first();
+        $group = Group::query()->create(['name' => 'Posts', 'icon' => $icon->id ]);
         $group->save();
-        $this->addBusinessToObject(Group::class, $group, $business);
+        $this->fillUserManipulation(Group::class, $group);
         $this->generatePermission([
             ['name' => 'object_type.index',   'identifier' => 'Tipos de publicaciones', 'show' => true],
             ['name' => 'object_type.all',     'identifier' => 'Obtener tipos de publicación'],
@@ -321,9 +292,10 @@ class FirstInstallationSeeder extends Seeder
 
         ], $group->id, $role );
 
-        $group = Group::query()->create(['name' => 'Enlaces', 'icon' => 'fas fa-file-image' ]);
+        $icon = Icon::query()->where('name','fa-solid fa-link' )->first();
+        $group = Group::query()->create(['name' => 'Enlaces', 'icon' => $icon->id ]);
         $group->save();
-        $this->addBusinessToObject(Group::class, $group, $business);
+        $this->fillUserManipulation(Group::class, $group);
         $this->generatePermission([
             ['name' => 'link.index',   'identifier' => 'Enlaces', 'show' => true],
             ['name' => 'link.all',     'identifier' => 'Obtener enlaces'],
@@ -337,6 +309,5 @@ class FirstInstallationSeeder extends Seeder
             ['name' => 'link.logs',    'identifier' => 'Obtener log de enlaces'],
 
         ], $group->id, $role );
-
     }
 }

@@ -4,10 +4,6 @@ namespace App\Models;
 
 use App\Interfaces\BaseModelInterface;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Kyslik\ColumnSortable\Sortable;
-use Spatie\Activitylog\LogOptions;
-use Spatie\Activitylog\Traits\LogsActivity;
 
 class Configuration extends BaseModel implements BaseModelInterface
 {
@@ -46,19 +42,19 @@ class Configuration extends BaseModel implements BaseModelInterface
     {
         return [
             'name' => [
-                'properties' => ['width' => 6, 'label' => __('Name')],
+                'properties' => ['width' => 6, 'label' => 'Name'],
                 'attributes' => ['type' => 'text', 'minlength' => 1, 'required' => true, 'class' => 'form-control']
             ],
             'custom_by_user' => [
-                'properties' => ['width' => 6, 'label' => __('Customizable by user') ],
+                'properties' => ['width' => 6, 'label' => 'Customizable by user' ],
                 'attributes' => ['type' => 'checkbox', 'class' => 'form-check-input']
             ],
             'description' => [
-                'properties' => ['width' => 12, 'label' => __('Description')],
+                'properties' => ['width' => 12, 'label' => 'Description'],
                 'attributes' => ['type' => 'textarea']
             ],
             'type' => [
-                'properties' => ['width' => 12, 'label' => __('Type')],
+                'properties' => ['width' => 12, 'label' => 'Type'],
                 'attributes' => [
                     'type' => 'object',
                     'name' =>'type',
@@ -68,13 +64,14 @@ class Configuration extends BaseModel implements BaseModelInterface
                 ]
             ],
             'default' => [
-                'properties' => ['width' => 12, 'label' => __('Default')],
+                'properties' => ['width' => 12, 'label' => 'Default'],
                 'attributes' => ['type' => 'variable', 'decision' => 'type' , 'minlength' => 1,  'class' => 'form-control']
             ],
         ];
     }
 
     /**
+     * @param string $parameters
      * @return array
      */
     public static function newObject(string $parameters = "") : array {
@@ -100,8 +97,6 @@ class Configuration extends BaseModel implements BaseModelInterface
      * @return HasOne
      */
     public function configuration():HasOne{
-        $business =  Business::query()->where('code', session(BUSINESS_IDENTIFY))->first();
-        return $this->hasOne(SystemConfiguration::class, 'configuration', 'id')
-            ->where('business', '=', $business->id);
+        return $this->hasOne(SystemConfiguration::class, 'configuration', 'id');
     }
 }

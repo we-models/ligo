@@ -3,10 +3,7 @@
 namespace App\Models;
 
 use App\Interfaces\BaseModelInterface;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use Kyslik\ColumnSortable\Sortable;
 
 class File extends BaseModel implements BaseModelInterface
 {
@@ -18,9 +15,7 @@ class File extends BaseModel implements BaseModelInterface
         'size',
         'extension',
         'mimetype',
-        'business',
         'user',
-        'visibility',
         'url',
         'permalink'
     ];
@@ -33,7 +28,7 @@ class File extends BaseModel implements BaseModelInterface
     /**
      * @var array|string[]
      */
-    public array $sortable = ['created_at', 'name', 'size', 'extension', 'visibility'];
+    public array $sortable = ['id','created_at', 'name', 'size', 'extension'];
 
     protected $hidden = ['updated_at', 'deleted_at'];
 
@@ -55,13 +50,6 @@ class File extends BaseModel implements BaseModelInterface
             'store' => route($this->singular . '.store', app()->getLocale()),
             'sorts' => $this->sortable
         ];
-    }
-    /**
-     * @return HasOne
-     */
-    public function business(): HasOne
-    {
-        return $this->hasOne(Business::class, 'id', 'business');
     }
 
     public function user(): HasOne{

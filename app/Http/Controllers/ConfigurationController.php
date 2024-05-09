@@ -7,14 +7,14 @@ use App\Interfaces\MainControllerInterface;
 use App\Models\Configuration;
 use App\Repositories\ConfigurationRepository;
 use App\Repositories\LogRepository;
+use Exception;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\Routing\ResponseFactory;
-use Illuminate\Contracts\View\Factory;
-use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
+use Throwable;
 
 /**
  *
@@ -61,18 +61,33 @@ class ConfigurationController extends BaseController implements MainControllerIn
      * @return Response|Application|ResponseFactory
      */
     public function store(Request $request): Response|Application|ResponseFactory {
-        $request['custom_by_user'] = $request['custom_by_user'] == 'on';
-        $input = $request->all();
+
         try {
+            $request->validate([
+                'description' => [
+                    'required'
+                ],
+            ],[
+                'description.required' => __('The [description] field is required'),
+            ]);
+
+
+            if ($request['type'] == 13) {
+                $request['default'] = $request['default'] == 'on';
+            }
+
+            $request['custom_by_user'] = $request['custom_by_user'] == 'on';
+            $input = $request->all();
+
             DB::beginTransaction();
             if($input['type']  == 16 || $input['type'] == 17){
                 $converted =  json_decode($input['default']);
-                if( $input['type']  == 16 && !is_array($converted)) throw new \Exception(__('The value is not an array'), 403);
+                if( $input['type']  == 16 && !is_array($converted)) throw new Exception(__('The value is not an array'), 403);
             }
             $this->configurationRepository->create($input);
             DB::commit();
             return response(__('Success'), 200);
-        }catch (\Throwable $e){
+        }catch (Throwable $e){
             DB::rollBack();
             return response($e->getMessage(), 403);
         }
@@ -94,7 +109,7 @@ class ConfigurationController extends BaseController implements MainControllerIn
             'fields' => $fields,
             'icons' => [],
             'csrf' => csrf_token(),
-            'title'=> __('Show the Configuration'),
+            'title'=> 'configuration',
             'url' => '#'
         ]);
     }
@@ -115,7 +130,7 @@ class ConfigurationController extends BaseController implements MainControllerIn
             'fields' => $fields,
             'icons' => "",
             'csrf' => csrf_token(),
-            'title'=> __('Update the Configuration'),
+            'title'=> 'configuration',
             'url' => route('configuration.update', ['locale' => $lang, 'configuration' => $id])
         ]);
     }
@@ -128,20 +143,34 @@ class ConfigurationController extends BaseController implements MainControllerIn
      * @return Response|Application|ResponseFactory
      */
     public function update(Request $request, string $lang, int $id): Response|Application|ResponseFactory {
-        $configuration = Configuration::query()->find($id);
         try {
+            $request->validate([
+                'description' => [
+                    'required'
+                ],
+            ],[
+                'description.required' => __('The [description] field is required'),
+            ]);
+
+
+            if ($request['type'] == 13) {
+                $request['default'] = $request['default'] == 'on';
+            }
+
+            $configuration = Configuration::query()->find($id);
+
             DB::beginTransaction();
             $request['custom_by_user'] = $request['custom_by_user'] == 'on';
             $input = $request->all();
             if($input['type']  == 16 || $input['type'] == 17){
                 $converted =  json_decode($input['default']);
-                if($converted == null) throw new \Exception(__('Invalid JSON/Array'), 403);
-                if( $input['type']  == 16 && !is_array($converted)) throw new \Exception(__('The value is not an array'), 403);
+                if($converted == null) throw new Exception(__('Invalid JSON/Array'), 403);
+                if( $input['type']  == 16 && !is_array($converted)) throw new Exception(__('The value is not an array'), 403);
             }
             $configuration->update($input);
             DB::commit();
             return response(__('Success'), 200);
-        }catch (\Throwable $e){
+        }catch (Throwable $e){
             DB::rollBack();
             return response($e->getMessage(), 403);
         }
@@ -159,7 +188,7 @@ class ConfigurationController extends BaseController implements MainControllerIn
             $configuration->delete();
             DB::commit();
             return response()->json(['delete' => 'success']);
-        }catch (\Throwable $e){
+        }catch (Throwable $e){
             DB::rollBack();
             return response($e->getMessage(), 403);
         }

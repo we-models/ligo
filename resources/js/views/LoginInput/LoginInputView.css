@@ -1,0 +1,63 @@
+.input-group {
+    width: 293px;
+    height: 38px;
+}
+/* ICON-INPUT-LEFT */
+.icon-input-left {
+    width: 42px;
+    height: 42px;
+    top: 461px;
+    left: 553px;
+    background: var(--primary );
+    border-top-left-radius: 60px;
+    border-bottom-left-radius: 60px;
+}
+
+.icon-input-right-email {
+    border-top-right-radius: 60px;
+    border-bottom-right-radius: 60px;
+    border: none;
+    height: 42px;
+}
+
+.icon-eye-style {
+    color: var(--accent, #c5d1ff);
+}
+
+.icon-eye-style:hover {
+    cursor: pointer;
+}
+
+.container-login-inputs .container-email,
+.container-login-inputs .container-password-default,
+.container-login-inputs .container-password-secondary
+{
+
+    width: 100%;
+}
+
+
+.container-login-inputs .input-group{
+    height: 40px;
+}
+
+.container-login-inputs .icon-input-left{
+    height: 44px;
+}
+
+
+.container-login-inputs .icon-input-right-email{
+    height: 44px;
+}
+
+.container-login-inputs .input-email{
+    border: 1px solid var(--accent) !important;
+}
+
+.container-login-inputs .input-password{
+    border: 1px solid var(--accent) !important;
+}
+
+.container-login-inputs .icon-input-right-email{
+    border: 1px solid var(--accent) !important;
+}

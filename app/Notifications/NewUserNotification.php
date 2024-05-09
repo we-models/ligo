@@ -14,10 +14,10 @@ use Illuminate\Support\Facades\URL;
 
 class NewUserNotification extends VerifyEmail
 {
-    public bool $is_app = false;
-    public function __construct($isApp)
+
+    public function __construct()
     {
-        $this->is_app = $isApp;
+
     }
 
     /**
@@ -56,7 +56,7 @@ class NewUserNotification extends VerifyEmail
             [
                 'id' => $notifiable->getKey(),
                 'hash' => sha1($notifiable->getEmailForVerification()),
-                'origin' => $this->is_app,
+                'origin' => false,
                 'locale' => app()->getLocale()
             ]
         );

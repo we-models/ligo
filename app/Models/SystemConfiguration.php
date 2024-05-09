@@ -10,7 +10,7 @@ class SystemConfiguration extends BaseModel implements BaseModelInterface
     /**
      * @var string[]
      */
-    public $fillable = ['configuration', 'value', 'business', 'user'];
+    public $fillable = ['configuration', 'value', 'user'];
 
     /**
      * @var string
@@ -34,13 +34,6 @@ class SystemConfiguration extends BaseModel implements BaseModelInterface
      */
     public function configuration():HasOne{
         return $this->hasOne(Configuration::class, 'id', 'configuration');
-    }
-
-    /**
-     * @return HasOne
-     */
-    public function business():HasOne{
-        return $this->hasOne(Business::class, 'id', BUSINESS_IDENTIFY);
     }
 
     /**

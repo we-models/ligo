@@ -6,9 +6,7 @@ use Dyrynda\Database\Support\CascadeSoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use JetBrains\PhpStorm\ArrayShape;
 use Kyslik\ColumnSortable\Sortable;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Models\Activity;
@@ -46,6 +44,7 @@ class BaseModel extends Model {
     }
 
     /**
+     * @param string $parameters
      * @return array
      */
     public static function newObject(string $parameters = ""): array
@@ -90,15 +89,6 @@ class BaseModel extends Model {
      */
     public function getPermissionsForModel(): array {
         return requestPermission($this->singular);
-    }
-
-    /**
-     * @param Activity $activity
-     * @param string $eventName
-     */
-    public function tapActivity(Activity $activity, string $eventName)
-    {
-        saveLogForBusiness($activity);
     }
 
     /**
@@ -155,23 +145,5 @@ class BaseModel extends Model {
             'user' )
             ->wherePivot('model_type', '=', get_class($this))
             ->withTimestamps();
-    }
-
-    /**
-     * @return BelongsToMany
-     */
-    public function all_business(): BelongsToMany {
-        return $this->belongsToMany(
-            Business::class,
-            'model_has_business',
-            'model_id',
-            'business' )
-            ->wherePivot('model_type', '=', get_class($this))
-            ->withTimestamps();
-    }
-
-    public static function getCurrentBusiness(){
-        $business = auth()->user()->business();
-        return $business->count() > 0 ?  $business->first() : null;
     }
 }

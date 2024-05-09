@@ -1,0 +1,31 @@
+.ruby {
+    display: ruby;
+}
+
+.bt-blue {
+    color: var(--primary);
+}
+.row-title{
+    display: flex;
+    flex-direction: row;
+    min-width: fit-content;
+    text-wrap: nowrap;
+    padding-right: 15px;
+}
+
+.sort-buttons {
+    padding-left: 5px;
+    display: flex;
+    flex-direction: row;
+    padding-top: 7px;
+}
+
+.sort-buttons a {
+    color: var(--grey);
+    margin-left: 5px;
+}
+td{
+    padding: 0 15px;
+}
+
+

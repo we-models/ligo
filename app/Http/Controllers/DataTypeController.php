@@ -8,7 +8,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Exception;
-use \Illuminate\Contracts\Foundation;
+use Illuminate\Contracts\Foundation;
 
 class DataTypeController extends Controller {
 
@@ -26,7 +26,8 @@ class DataTypeController extends Controller {
     }
 
 
-    public function index(Request $request) {
+    public function index(Request $request): bool
+    {
         return true;
     }
 
@@ -51,7 +52,7 @@ class DataTypeController extends Controller {
             'fields' => $fields,
             'icons' => "[]",
             'csrf' => csrf_token(),
-            'title'=> __('Show the Data Type'),
+            'title'=> 'Data type',
             'url' => '#'
         ]);
     }

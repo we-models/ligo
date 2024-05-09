@@ -3,24 +3,22 @@
 namespace App\Http\Controllers;
 
 use App\Interfaces\MainControllerInterface;
-use App\Models\Business;
 use App\Models\Group;
-use App\Models\Icon;
 use App\Models\NewRole;
-use App\Repositories\BusinessRepository;
 use App\Repositories\GroupRepository;
 use App\Repositories\LogRepository;
-use Barryvdh\DomPDF\Facade\Pdf;
 use Exception;
 use Illuminate\Contracts\Routing\ResponseFactory;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
-use \Illuminate\Contracts\Foundation;
+use Illuminate\Contracts\Foundation;
+use Illuminate\Validation\Rule;
+
+use Throwable;
 
 /**
  * THE GROUPS ARE THE ELEMENTS PRESENTS ON THE MENU
@@ -59,18 +57,7 @@ class GroupController extends BaseController implements MainControllerInterface 
     public function all(Request $request): Response|JsonResponse  {
         $rq = getRequestParams($request);
         $groups = $this->groupRepository->search($rq->search);
-
-        $own_roles = auth()->user()->getRoleNames()->toArray();
-
-        //if(!auth()->user()->hasAnyRole(ALL_ACCESS)){
-        //    $groups = $groups->whereHas('roles', function ($q) use ($own_roles){
-        //        $q->whereIn('name', $own_roles);
-        //    });
-        //}
-
-        $groups = $groups
-            ->whereHas(BUSINESS_IDENTIFY)
-            ->sortable();
+        $groups = $groups->sortable();
         return  $this->groupRepository->getResponse($groups, $rq);
     }
 
@@ -82,8 +69,6 @@ class GroupController extends BaseController implements MainControllerInterface 
         $this->setIcons();
         $obj    =   new $this->object($this->getParams($request, false));
         return response()->json([
-            'rating_types_url' => route('comment.rating_types', app()->getLocale()),
-            'comments' => route('comment.all', app()->getLocale()),
             'object' => $this->object,
             'title' => __(strtoupper($obj->singular)),
             'csrf' => csrf_token(),
@@ -105,20 +90,25 @@ class GroupController extends BaseController implements MainControllerInterface 
      * @param Request $request
      * @return Foundation\Application|ResponseFactory|Response
      * @throws Exception
-     *
-     * IF THE USER HAS NOT PERMISSIONS FOR THE SELECTED BUSINESS THE SYSTEM WILL APPLY THE CURRENT BUSINESS
      */
     public function store(Request $request): Response|Foundation\Application|ResponseFactory {
-        $input = $request->all();
         try {
+            $request->validate([
+                'icon' => [
+                    'required'
+                ],
+            ],[
+                'icon.required' => __('The [icon] field is required'),
+            ]);
+
+            $input = $request->all();
+
             DB::beginTransaction();
             $group  = $this->groupRepository->create($input);
-            $business = Business::query()->where('code', session('business'))->first();
-            $group->business()->attach($business, ['model_type' => Group::class]);
             $this->saveManipulation($group);
             DB::commit();
             return response(__('Success'), 200);
-        }catch (\Throwable $e){
+        }catch (Throwable $e){
             DB::rollBack();
             return response($e->getMessage(), 403);
         }
@@ -135,11 +125,11 @@ class GroupController extends BaseController implements MainControllerInterface 
         $group = $this->groupRepository->find($id);
         if (empty($group)) return response(__('Not found'), 404);
         return response([
-            'object' => $this->groupRepository->makeModel()->whereHas(BUSINESS_IDENTIFY)->with($this->groupRepository->includes)->where('id',$id)->first(),
+            'object' => $this->groupRepository->makeModel()->with($this->groupRepository->includes)->where('id',$id)->first(),
             'fields' => $fields,
             'icons' => getAllIcons(),
             'csrf' => csrf_token(),
-            'title'=> __('Show the group'),
+            'title'=>  'group',
             'url' => '#'
         ]);
     }
@@ -155,11 +145,11 @@ class GroupController extends BaseController implements MainControllerInterface 
         $group = $this->groupRepository->find($id);
         if (empty($group)) return response(__('Not found'), 404);
         return response([
-            'object' => $this->groupRepository->makeModel()->whereHas(BUSINESS_IDENTIFY)->with($this->groupRepository->includes)->where('id',$id)->first(),
+            'object' => $this->groupRepository->makeModel()->with($this->groupRepository->includes)->where('id',$id)->first(),
             'fields' => $fields,
             'icons' => getAllIcons(),
             'csrf' => csrf_token(),
-            'title'=> __('Update the group'),
+            'title'=> 'group',
             'url' => route('group.update', ['locale' => $lang, 'group' => $id])
         ]);
     }
@@ -170,13 +160,21 @@ class GroupController extends BaseController implements MainControllerInterface 
      * @param int $id
      * @return Foundation\Application|ResponseFactory|Response
      * @throws Exception
-     *
-     * IF THE USER HAS NOT PERMISSIONS FOR THE SELECTED BUSINESS THE SYSTEM WILL APPLY THE CURRENT BUSINESS
      */
     public function update(Request $request, String $lang, int $id): Response|Foundation\Application|ResponseFactory {
-        $input = $request->all();
-        $group = $this->groupRepository->makeModel()->where('id', $id)->whereHas(BUSINESS_IDENTIFY)->first();
         try {
+            $request->validate([
+                'icon' => [
+                    'required'
+                ],
+            ],[
+                'icon.required' => __('The [icon] field is required'),
+            ]);
+
+            $input = $request->all();
+            $group = $this->groupRepository->makeModel()->where('id', $id)->first();
+
+
             if($group == null){
                 throw new Exception(__('The user can not update this item'));
             }
@@ -185,7 +183,7 @@ class GroupController extends BaseController implements MainControllerInterface 
             $this->saveManipulation($group, 'updated');
             DB::commit();
             return response(__('Success'), 200);
-        }catch (\Throwable $e){
+        }catch (Throwable $e){
             DB::rollBack();
             return response($e->getMessage(), 403);
         }
@@ -198,7 +196,7 @@ class GroupController extends BaseController implements MainControllerInterface 
      * @throws Exception
      */
     public function destroy(String $lang, int $id): Response|JsonResponse|Foundation\Application|ResponseFactory {
-        $group = $this->groupRepository->makeModel()->where('id', $id)->whereHas(BUSINESS_IDENTIFY)->first();
+        $group = $this->groupRepository->makeModel()->where('id', $id)->first();
         try {
             if($group == null){
                 throw new Exception(__('The user can not delete this item'));
@@ -208,7 +206,7 @@ class GroupController extends BaseController implements MainControllerInterface 
             $group->delete();
             DB::commit();
             return response()->json(['delete' => 'success']);
-        }catch (\Throwable $e){
+        }catch (Throwable $e){
             DB::rollBack();
             return response($e->getMessage(), 403);
         }
@@ -228,21 +226,11 @@ class GroupController extends BaseController implements MainControllerInterface 
      * @return Factory|View|Foundation\Application
      */
     public function assignRoles(Request $request): Factory|View|Foundation\Application {
-        return view('pages.assignments.assign', [
+        return view('pages.general.assign', [
             'url' => route('assign.objects', app()->getLocale()) ,
             'rows' => NewRole::class,
             'columns' => Group::class,
             'key' => 'group_has_role'
         ]);
     }
-
-    public function assignBusiness(Request $request): Factory|View|Foundation\Application{
-        return view('pages.assignments.assign', [
-            'url' => route('assign.objects', app()->getLocale()) ,
-            'rows' => Business::class,
-            'columns' => Group::class,
-            'key' => 'group_has_business'
-        ]);
-    }
-
 }

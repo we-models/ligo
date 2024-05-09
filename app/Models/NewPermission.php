@@ -4,9 +4,7 @@ namespace App\Models;
 
 use App\Interfaces\BaseModelInterface;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use JetBrains\PhpStorm\ArrayShape;
 use Kyslik\ColumnSortable\Sortable;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Models\Activity;
@@ -33,7 +31,7 @@ class NewPermission extends Permission implements  BaseModelInterface
     /**
      * @var array|string[]
      */
-    public array $sortable = ['id', 'name', 'guard_name', 'detail', 'group', 'show_in_menu'];
+    public array $sortable = ['id', 'name', 'guard_name', 'detail', 'group', 'show_in_menu', 'identifier'];
 
     /**
      * @var string[]
@@ -60,23 +58,23 @@ class NewPermission extends Permission implements  BaseModelInterface
     {
         return [
             'name' => [
-                'properties' => ['width' => 6, 'label' => __('Name')],
+                'properties' => ['width' => 6, 'label' => 'Name'],
                 'attributes' => ['type' => 'text', 'minlength' => 1, 'required' => true, 'class' => 'form-control']
             ],
             'identifier' => [
-                'properties' => ['width' => 6, 'label' => __('Identifier')],
+                'properties' => ['width' => 6, 'label' =>'Identifier'],
                 'attributes' => ['type' => 'text', 'minlength' => 1, 'required' => true, 'class' => 'form-control']
             ],
             'guard_name' => [
-                'properties' => ['width' => 6, 'label' => __('Guard') ],
+                'properties' => ['width' => 6, 'label' => 'Guard' ],
                 'attributes' => ['type' => 'text', 'minlength' => 1, 'value' =>'web', 'readonly'=>'', 'required' => true, 'class' => 'form-control']
             ],
             'show_in_menu' => [
-                'properties' => ['width' => 6, 'label' => __('Show in menu') ],
+                'properties' => ['width' => 6, 'label' =>'Show in menu' ],
                 'attributes' => ['type' => 'checkbox', 'class' => 'form-check-input']
             ],
             'detail' => [
-                'properties' => ['width' => 12, 'label' => __('Detail')],
+                'properties' => ['width' => 12, 'label' => 'Detail'],
                 'attributes' => ['type' => 'textarea']
             ]
         ];
@@ -84,9 +82,10 @@ class NewPermission extends Permission implements  BaseModelInterface
 
 
     /**
+     * @param null $parameters
      * @return array
      */
-    public static function newObject($pt = null) : array
+    public static function newObject($parameters = null) : array
     {
         return [
             'id' =>0,
@@ -115,15 +114,6 @@ class NewPermission extends Permission implements  BaseModelInterface
     }
 
     /**
-     * @param Activity $activity
-     * @param string $eventName
-     */
-    public function tapActivity(Activity $activity, string $eventName)
-    {
-        saveLogForBusiness($activity);
-    }
-
-    /**
      * @return array
      */
     public function publicAttributes():array
@@ -147,30 +137,5 @@ class NewPermission extends Permission implements  BaseModelInterface
             'group' )
             ->wherePivot('model_type', '=', NewPermission::class)
             ->withTimestamps();
-    }
-
-    /**
-     * @return BelongsToMany
-     */
-    public function all_business(): BelongsToMany
-    {
-        return $this->belongsToMany(
-            Business::class,
-            'model_has_business',
-            'model_id',
-            'business' )
-            ->wherePivot('model_type', '=', NewPermission::class)
-            ->withTimestamps();
-    }
-
-    /**
-     * @return BelongsToMany
-     */
-    public function business(): BelongsToMany
-    {
-        if( auth()->user()->hasAnyRole(ALL_ACCESS) || session(BUSINESS_IDENTIFY) == null){
-            return $this->all_business();
-        }
-        return $this->all_business()->where('code', '=',  session(BUSINESS_IDENTIFY));
     }
 }

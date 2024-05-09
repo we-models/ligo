@@ -15,16 +15,15 @@ class FileRepository extends BaseRepository implements BaseRepositoryInterface
         'id',
         'name',
         'size',
-        'extension',
-        'visibility'
+        'extension'
     ];
 
     /**
      * @var array
      */
-    public  array $includes = ['business', 'user', 'images'];
+    public  array $includes = [ 'user', 'images'];
 
-    public function getFieldsSearchable()
+    public function getFieldsSearchable(): array
     {
         return $this->fields;
     }

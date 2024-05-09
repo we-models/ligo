@@ -10,31 +10,27 @@ class ConfigTypeSeeder extends Seeder
 {
     /**
      * Run the database seeds.
-     *
-     * @return void
      */
-    public function run()
+    public function run(): void
     {
         DB::table('data_type')->insert([
-            [ 'name' => 'String' ],
-            [ 'name' => 'Text' ],
-            [ 'name' => 'Html' ],
-            [ 'name' => 'Email' ],
-            [ 'name' => 'Phone' ],
-            [ 'name' => 'Color' ],
-            [ 'name' => 'Integer' ],
-            [ 'name' => 'Decimal' ],
-            [ 'name' => 'Double' ],
-            [ 'name' => 'Date' ],
-            [ 'name' => 'Time' ],
-            [ 'name' => 'DateTime' ],
-            [ 'name' => 'Boolean' ],
-            [ 'name' => 'Image' ],
-            [ 'name' => 'File' ],
-            [ 'name' => 'Array' ],
-            [ 'name' => 'Json' ],
-            [ 'name' => 'Link' ],
-            [ 'name' => 'Select' ],
+            ['id'=>1, 'name' => 'String' ],
+            ['id'=>2, 'name' => 'Text' ],
+            ['id'=>4, 'name' => 'Email' ],
+            ['id'=>5, 'name' => 'Phone' ],
+            ['id'=>6, 'name' => 'Color' ],
+            ['id'=>7, 'name' => 'Integer' ],
+            ['id'=>8, 'name' => 'Decimal' ],
+            ['id'=>9, 'name' => 'Double' ],
+            ['id'=>10, 'name' => 'Date' ],
+            ['id'=>11, 'name' => 'Time' ],
+            ['id'=>12, 'name' => 'DateTime' ],
+            ['id'=>13, 'name' => 'Boolean' ],
+            ['id'=>14, 'name' => 'Image' ],
+            ['id'=>15, 'name' => 'File' ],
+            ['id'=>18, 'name' => 'Link' ],
+            ['id'=>19, 'name' => 'Select' ],
+            ['id'=>20, 'name' => 'Map' ]
         ]);
     }
 }

@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Interfaces;
-
 use Illuminate\Database\Eloquent\Builder;
 
 interface BaseRepositoryInterface

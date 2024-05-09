@@ -41,16 +41,10 @@ class RatingType extends BaseModel implements BaseModelInterface
      */
     public function getFields(bool $self = false) : array
     {
-        $has_business = self::getCurrentBusiness() != null;
         $response = [
-            (new Prop('name', __('Name'), [], 8))->textInput(),
-            (new Prop('object_type', __('Object type'), [],4))->objectInput(new ObjectType()),
+            (new Prop('name', 'Name', [], 8))->textInput(),
+            (new Prop('object_type', 'Object type', [],4))->objectInput(new ObjectType()),
         ];
-        if($has_business){
-            $response = array_merge(
-                $response,[(new Prop('business', __('Business'), [], 12))->objectInput(new Business())]
-            );
-        }
         return $this->getMergedFields($response);
     }
 
@@ -63,8 +57,7 @@ class RatingType extends BaseModel implements BaseModelInterface
         return [
             'id' =>0,
             'name' => '',
-            'object_type' => null,
-            'business' => self::getCurrentBusiness(),
+            'object_type' => null
         ];
     }
 
@@ -74,14 +67,5 @@ class RatingType extends BaseModel implements BaseModelInterface
     public function object_type(): HasOne
     {
         return $this->hasOne(ObjectType::class, 'id', 'object_type');
-    }
-
-    /**
-     * @return BelongsToMany
-     */
-    public function business(): BelongsToMany
-    {
-        if( auth()->user()->hasAnyRole(ALL_ACCESS)) return $this->all_business();
-        return $this->all_business()->where('code', '=',  session(BUSINESS_IDENTIFY));
     }
 }

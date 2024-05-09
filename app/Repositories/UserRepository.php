@@ -7,7 +7,6 @@ namespace App\Repositories;
 use App\Interfaces\BaseRepositoryInterface;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
-use JetBrains\PhpStorm\ArrayShape;
 
 /**
  *
@@ -18,12 +17,23 @@ class UserRepository extends BaseRepository implements BaseRepositoryInterface
     /**
      * @var array|string[]
      */
-    protected array $fields =['name', 'email', 'code'];
+    protected array $fields =[
+        'name',
+        'lastname',
+        'email',
+        'code',
+        'document_type',
+        'area',
+        'ndocument',
+        'birthday',
+        'ncontact',
+        'area','enable'
+    ];
 
     /**
      * @var array
      */
-    public array $includes = [BUSINESS_IDENTIFY];
+    public array $includes = ['images', 'documentType', 'area'];
 
 
     /**
@@ -60,10 +70,16 @@ class UserRepository extends BaseRepository implements BaseRepositoryInterface
         return [
             'id' =>          ['name' => 'ID'],
             'name' =>        ['name' => __('Name')],
+            'lastname' =>        ['name' => __('LastName')],
+            'document_type' =>        ['name' => __('Document type')],
+            'ndocument' =>        ['name' => __('Document number')],
+            'birthday' =>        ['name' => __('Birthday')],
+            'ncontact' =>        ['name' => __('Contact number')],
+            'area' =>        ['name' => __('Area')],
             'email' =>        ['name' => __('Email')],
             'code' => ['code' => __('Code')],
             'created_at'=>   ['name' => __('Created at')],
-            'business' => ['name' => __('Business')]
+            'enable'=>   ['name' => __('Enable')]
         ];
     }
 

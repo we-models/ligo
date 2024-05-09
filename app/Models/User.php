@@ -2,19 +2,19 @@
 
 namespace App\Models;
 
-use App\Interfaces\BaseModelInterface;
 use App\Notifications\NewUserNotification;
 use App\Notifications\ResetPasswordNotification;
+use App\Properties\Prop;
 use Dyrynda\Database\Support\CascadeSoftDeletes;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Request;
-use JetBrains\PhpStorm\ArrayShape;
 use Kyslik\ColumnSortable\Sortable;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Models\Activity;
@@ -24,11 +24,9 @@ use Laravel\Passport\HasApiTokens;
 /**
  *
  */
-class User extends Authenticatable implements MustVerifyEmail
+class User extends Authenticatable
 {
     use HasFactory, HasRoles, SoftDeletes, CascadeSoftDeletes, LogsActivity, Sortable, HasApiTokens, Notifiable;
-
-    public bool $is_app = false;
 
     public string $singular = 'user';
 
@@ -37,7 +35,7 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public string $query = "";
 
-    public function __construct(string $query= "")
+    public function __construct(string $query = "")
     {
         parent::__construct();
         $this->query = $query;
@@ -50,9 +48,16 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     protected $fillable = [
         'name',
+        'lastname',
+        'document_type',
+        'ndocument',
+        'birthday',
+        'ncontact',
         'email',
         'password',
-        'code'
+        'area',
+        'code',
+        'enable'
     ];
 
     /**
@@ -71,67 +76,108 @@ class User extends Authenticatable implements MustVerifyEmail
      * @var array<string, string>
      */
     protected $casts = [
-        'email_verified_at' => 'datetime',
+        'email_verified_at' => 'datetime'
     ];
 
     /**
      * @var array|string[]
      */
-    public array $sortable = ['id', 'name', 'email'];
+    public array $sortable = [
+        'id',
+        'name',
+        'lastname',
+        'document_type',
+        'ndocument',
+        'email',
+        'birthday',
+        'ncontact',
+        'area',
+        'enable'
+    ];
 
     /**
 
      */
-    public function getFields($self=false)
+    public function getFields($self=false,array $keysToExclude = []): array
     {
-        $business = Business::query();
-        $business = getBusiness($business)->count();
+        App::setLocale('es');
+        $response = [];
 
-        $response = [
-            'name' => [
-                'properties' => ['width' => 6, 'label' => __('Name')],
-                'attributes' => ['type' => 'text', 'minlength' => 1, 'required' => true, 'class' => 'form-control']
-            ],
-            'email' => [
-                'properties' => ['width' => 6, 'label' => __('Email') ],
-                'attributes' => ['type' => 'email', 'required' => true, 'class' => 'form-control']
-            ],
-        ];
-        if($business > 0){
-            $response = array_merge($response, [
-                'business' => [
-                    'properties' => ['width' => 12, 'label' => __('Business')],
-                    'attributes' => [
-                        'type' => 'object',
-                        'name' =>'business',
-                        'required' => true,
-                        'multiple' => true ,
-                        'data' => (new Business())->publicAttributes()
-                    ]
-                ],
+        if (!in_array("enable",$keysToExclude)) {
+            $response = array_merge($response,[
+                (new Prop('enable', 'Enable', [], 12))->booleanInput(),
             ]);
+        }
+
+        $response = array_merge($response,[
+        (new Prop('name', 'Name', [], 6))->textInput(),
+        (new Prop('lastname', 'Last name', [], 6))->textInput(),
+        ]);
+
+
+
+        if($self){
+            $doctype= ObjectType::query()->where('slug', 'tipo_documento')->first();
+            $response = array_merge($response, [
+                (new Prop('document_type', 'Document type', [],8))->objectInput(new TheObject('?object_type=' . $doctype->id))
+            ]);
+        }
+
+        $response = array_merge($response,[
+            (new Prop('ndocument', 'N of document', [], 4))->textInput(),
+            (new Prop('birthday', 'Birthday', [], 4))->dateInput(),
+            (new Prop('ncontact', 'Telef contacto', [], 4))->telInput()
+        ]);
+
+        if($self){
+            $area= ObjectType::query()->where('slug', 'area_trabajo')->first();
+            $response = array_merge($response, [
+                (new Prop('area', 'Area', [],4))->objectInput(new TheObject('?object_type=' . $area->id))
+            ]);
+        }
+
+        $response = array_merge($response, [
+            (new Prop('email', 'E-Mail Address', [], 8))->textInput(),
+            (new Prop('images', 'Photo', [],4))->imageInput()
+        ]);
+
+
+        return $this->getMergedFields($response);
+    }
+
+    /**
+     * @param array $fields
+     * @return array
+     */
+    public function getMergedFields(array $fields): array {
+        $response = [];
+        foreach ($fields as $field){
+            $response = array_merge($response, $field);
         }
         return $response;
     }
 
     /**
+     * @param null $parameters
      * @return array
      */
-    public static function newObject($pt = null) : array
+    public static function newObject($parameters = null) : array
     {
-        $business = auth()->user()->business();
-        $business = $business->count() > 0 ?  $business->get() : [];
         return [
-            'id' =>0,
+            'enable' => true,
+            'images' => null,
             'name' => '',
+            'lastname' => '',
             'email' => '',
-            'business' => $business,
-            'code' => ''
+            'document_type' => null,
+            'ndocument' => '',
+            'birthday' => '',
+            'ncontact' => '',
+            'area' => null
         ];
     }
 
     /**
-     * @param string $uri
      * @return array
      */
     public function getPermissionsForModel(): array
@@ -148,50 +194,20 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * @param Activity $activity
-     * @param string $eventName
-     */
-    public function tapActivity(Activity $activity, string $eventName)
-    {
-        saveLogForBusiness($activity);
-    }
-
-    /**
      * @return array
      */
     public function publicAttributes(): array
     {
+        if(!str_starts_with($this->query, '?')){
+            $this->query = '?'. $this->query;
+        }
+
         return [
             'fields' => $this->getFields(),
             'values' => $this->newObject(),
-            'url' => route($this->singular . '.all', app()->getLocale()),
-            'index' => route($this->singular . '.index', app()->getLocale())
+            'url' => route($this->singular . '.all', app()->getLocale()) . $this->query,
+            'index' => route($this->singular . '.index', app()->getLocale()) . $this->query
         ];
-    }
-
-    /**
-     * @return BelongsToMany
-     */
-    public function all_business(): BelongsToMany
-    {
-        return $this->belongsToMany(
-            Business::class,
-            'model_has_business',
-            'model_id',
-            'business' )
-            ->wherePivot('model_type', '=', User::class)
-            ->withTimestamps();
-    }
-
-    /**
-     * @return BelongsToMany
-     */
-    public function business(): BelongsToMany
-    {
-        if( !Auth::check() || auth()->user()->hasAnyRole(ALL_ACCESS) || session(BUSINESS_IDENTIFY) == null){
-            return $this->all_business();
-        }
-        return $this->all_business()->where('code', '=',  session(BUSINESS_IDENTIFY));
     }
 
     /**
@@ -203,23 +219,16 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * Send the email verification notification.
-     *
-     * @return void
+     * @param Activity $activity
+     * @param string $eventName
      */
-    public function sendEmailVerificationNotification()
+    public function tapActivity(Activity $activity, string $eventName)
     {
-        $this->notify(new NewUserNotification($this->is_app));
-    }
-
-    public function sendPasswordResetNotification($token)
-    {
-        setEmailConfiguration();
-        $this->notify(new ResetPasswordNotification($this->is_app, $token));
-    }
-
-    public function reset(Request $request){
-
+        if($eventName == 'created' || $eventName == 'updated'){
+            $props = $activity->properties->toArray();
+            $props['attributes']['images'] = $this->images()->get()->toJson();
+            $activity->properties = $props;
+        }
     }
 
     /**
@@ -235,6 +244,36 @@ class User extends Authenticatable implements MustVerifyEmail
             ->wherePivot('model_type', '=', get_class($this))
             ->withTimestamps();
     }
+
+    public function sendPasswordResetNotification($token)
+    {
+        setEmailConfiguration();
+        $this->notify(new ResetPasswordNotification($token));
+    }
+
+    /**
+     * @return BelongsToMany
+     */
+    public function images(): BelongsToMany {
+        return $this->belongsToMany(
+            ImageFile::class,
+            'model_has_image',
+            'model_id',
+            'image' )
+            ->wherePivot('model_type', '=', get_class($this))
+            ->wherePivot('field', '=', 'images')
+            ->withTimestamps();
+    }
+
+    public function documentType(): HasOne
+    {
+        return $this->hasOne(TheObject::class, 'id', 'document_type');
+    }
+
+    public function area(): HasOne
+    {
+        return $this->hasOne(TheObject::class, 'id', 'area');
+    }
+
+
 }
-
-

@@ -1,0 +1,114 @@
+.media-container {
+    display: flex;
+    gap: 20px;
+    flex-direction: column;
+}
+
+.image {
+    width: 70%;
+}
+
+.input-group-text {
+    background-color: var(--accent);
+    color: var(--secondary);
+}
+
+.input-group-text a i {
+    color: var(--secondary)
+}
+
+.selector-input {
+    height: auto;
+    display: flex;
+    border: 1px solid var(--accent) !important;
+    border-radius: 25px 0 0 25px;
+}
+
+.selector-button {
+    border-radius: 0 25px 25px;
+    border: 1px solid var(--accent) !important;
+    padding: unset;
+    justify-content: center;
+    display: flex;
+}
+
+.selector-button a {
+    min-width: 35px;
+    min-height: 35px;
+}
+
+.selector-button a i {
+    margin-top: 10px;
+}
+
+.file-image-container{
+    border-radius: 22px;
+    background-color: var(--file);
+    min-height: 150px;
+    padding: 20px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-content: center;
+    text-align: center;
+    gap: 15px;
+}
+.file-icon{
+    font-size: 60px;
+    color: var(--primary);
+}
+.btn-img-file{
+    background-color: var(--white);
+    border:1px solid var(--accent);
+    width: fit-content;
+    margin: 0 auto;
+    border-radius: 25px;
+    font-family: "Roboto", sans-serif;
+    font-weight: 400;
+    font-size: 15px;
+    line-height: 28px;
+    padding: 2px 15px;
+    color: var(--primary);
+}
+
+.flexible{
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+    margin:0 auto;
+    justify-content: center;
+    align-items: center;
+}
+
+.flexible label{
+    width: 90%;
+    overflow-x: scroll;
+}
+
+.to-add {
+    width: 100%
+}
+.for-creation{
+    margin-right: 7px
+}
+
+.title-modal{
+    color: var(--primary);
+}
+
+
+.hidden-input {
+    height: 0px;
+  border: none;
+  background: transparent;
+  padding: 0;
+  position: absolute;
+}
+
+.hidden-input:required {
+    border-color: transparent; /* Establece el borde como transparente */
+    box-shadow: none; /* Elimina cualquier sombra que se pueda aplicar */
+    outline: none; /* Elimina el contorno del input */
+  }

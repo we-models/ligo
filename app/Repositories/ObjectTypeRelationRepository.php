@@ -12,12 +12,12 @@ class ObjectTypeRelationRepository extends BaseRepository implements BaseReposit
     /**
      * @var array|string[]
      */
-    protected array $fields =['name', 'slug', 'type', 'object_type', 'relation', 'tab', 'order', 'filling_method', 'required', 'description', 'instructions'];
+    protected array $fields =['name', 'slug', 'type', 'object_type', 'relation', 'tab', 'order', 'filling_method', 'required', 'description', 'width'];
 
     /**
      * @var array
      */
-    public array $includes = [BUSINESS_IDENTIFY, 'object_type', 'relation', 'manipulated_by', 'tab', 'video'];
+    public array $includes = ['object_type', 'relation', 'manipulated_by', 'tab', 'roles'];
 
     /**
      * @return array
@@ -44,13 +44,13 @@ class ObjectTypeRelationRepository extends BaseRepository implements BaseReposit
             'id' =>             ['name' => 'ID'],
             'name' =>           ['name' => __('Name')],
             'description' =>    ['name' => __('Description')],
-            'instructions' => ['name' => __('Instructions')],
             'slug' =>           ['name' => __('Slug')],
             'type' =>           ['name' => __('Type')],
             'filling_method' => ['name' => __('Filling method')],
             'object_type' =>    ['name' => __('Object type')],
             'relation' =>       ['name' => __('Relation')],
-            'required' => ['name' => __('Required')]
+            'required' => ['name' => __('Required')],
+            'width' =>        ['name' => __('Width')],
         ];
     }
 

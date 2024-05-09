@@ -17,7 +17,7 @@ class RatingTypeRepository  extends BaseRepository implements BaseRepositoryInte
     /**
      * @var array
      */
-    public array $includes = [BUSINESS_IDENTIFY,  'object_type'];
+    public array $includes = ['object_type'];
 
     /**
      * @return array
@@ -44,8 +44,7 @@ class RatingTypeRepository  extends BaseRepository implements BaseRepositoryInte
             'id' =>          ['name' => 'ID'],
             'name' =>        ['name' => __('Name')],
             'object_type' =>        ['name' => __('Object type')],
-            'created_at'=>   ['name' => __('Created at')],
-            'business' =>   ['name' => __('Business')]
+            'created_at'=>   ['name' => __('Created at')]
         ];
     }
 

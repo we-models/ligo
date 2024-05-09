@@ -2,13 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\BaseModel;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use stdClass;
+use Spatie\Activitylog\Models\Activity;
 
 class BaseController extends Controller {
 
@@ -33,6 +32,7 @@ class BaseController extends Controller {
 
     /**
      * @param Request $request
+     * @param bool $showAsParam
      * @return string
      */
     public function getParams(Request $request, bool $showAsParam = true):string{
@@ -49,6 +49,7 @@ class BaseController extends Controller {
     }
 
     /**
+     * @param string $parameters
      * @return array
      */
     public function getCustomFieldsRelations(string $parameters) : array{
@@ -60,10 +61,9 @@ class BaseController extends Controller {
      * @return JsonResponse
      */
     public function details(Request $request): JsonResponse {
+
         $obj = $this->getObject($request);
         return response()->json([
-            'rating_types_url' => route('comment.rating_types', app()->getLocale()),
-            'comments' => route('comment.all', app()->getLocale()),
             'object' => $this->object,
             'title' => __(strtoupper($obj->singular)),
             'csrf' => csrf_token(),
@@ -99,11 +99,22 @@ class BaseController extends Controller {
 
     /**
      * @param $model
-     * @param $status
+     * @param string $status
      * @return void
      */
-    public function saveManipulation($model, $status = 'created'){
-        $model->manipulated_by()->attach(auth()->user()->getAuthIdentifier(), ['model_type' => get_class($model), 'type' => $status]);
+    public function saveManipulation($model, string $status = 'created', string $details = ''): void
+    {
+        $model->manipulated_by()->attach(auth()->user()->getAuthIdentifier(), ['model_type' => get_class($model), 'type' => $status, 'details'=> $details] );
+    }
+
+
+    /**
+     * @param Activity $activity
+     * @param string $eventName
+     */
+    public function tapActivity(Activity $activity, string $eventName)
+    {
+        $ggs =99;
     }
 
 }

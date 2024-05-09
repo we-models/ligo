@@ -7,7 +7,6 @@ namespace App\Repositories;
 use App\Interfaces\BaseRepositoryInterface;
 use App\Models\NewRole;
 use Illuminate\Database\Eloquent\Builder;
-use JetBrains\PhpStorm\ArrayShape;
 
 /**
  *
@@ -18,11 +17,11 @@ class RoleRepository extends BaseRepository implements BaseRepositoryInterface
     /**
      * @var array|string[]
      */
-    protected array $fields =['name', 'guard_name', 'description'];
+    protected array $fields =['name', 'description'];
     /**
      * @var array|string[]
      */
-    public array $includes = [BUSINESS_IDENTIFY];
+    public array $includes = [];
 
     /**
      * @return array
@@ -31,12 +30,7 @@ class RoleRepository extends BaseRepository implements BaseRepositoryInterface
         return [
             'id' =>          ['name' => 'ID'],
             'name' =>        ['name' => __('Name')],
-            'guard_name' =>  ['name' => __('Guard')],
             'description' => ['name' => __('Description')],
-            'is_admin' =>    ['name' => __('Is administrator')],
-            'public' =>      ['name' => __('Is public')],
-            'icon' =>        ['name' => __('Icon')],
-            'business'=> ['name' => __('Business')],
             'groups'=> ['name' => __('Groups')],
             'created_at'=>   ['name' => __('Created at')]
         ];

@@ -1,0 +1,161 @@
+.navBar {
+    background: var(--colorMainBar, #e9edff);
+    height: 84px;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    padding: 0 30px;
+
+    position: fixed;
+    z-index: 2;
+    width: 100%;
+}
+
+
+.flex-1 {
+    flex: 1;
+}
+
+.logo-img {
+    flex: 7;
+}
+
+.icons-msg {
+    display: flex;
+    justify-content: start;
+    gap: 20px;
+}
+
+.list-config-nav-bar{
+    background: var(--primary);
+}
+
+.help-text {
+    font-family: "Poppins", sans-serif;
+    font-size: 16px;
+    line-height: 24px;
+    letter-spacing: 0.02em;
+    font-weight: 400;
+    color: var(--secondary, #6370E0);
+}
+
+.close-session a {
+    font-family: "Poppins", sans-serif;
+
+    font-size: 16px;
+    font-weight: 900;
+    line-height: 24px;
+    letter-spacing: 0.02em;
+    text-decoration: none;
+    color: var(--links, #3e3c7dcf);
+
+}
+
+.icon-config {
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    position: relative;
+}
+
+.link-icon-config{
+    text-decoration:none;
+}
+
+.envelope-text {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.close-session {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.box-icons {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: var(--accent, #c5d1ff);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.box-icons .fa-gear {
+
+    font-size: 24.18px;
+    color: var(--primary, #6370e0);
+}
+
+.box-icons .fa-envelope {
+    font-size: 18px;
+    color: var(--primary, #6370e0);
+}
+
+.text-session {
+    font-family: "Poppins", sans-serif;
+    margin: 0;
+    font-size: 16px;
+    line-height: 24px;
+    font-family: Poppins;
+    letter-spacing: 0.02em;
+    font-weight: 900;
+    color: var(--secondary, #6370E0);
+}
+
+@media screen and (min-width: 1500px) {
+
+}
+
+@media screen and (min-width: 1024px) and (max-width: 1500px) {
+    .logo-img {
+        flex: 5;
+    }
+}
+
+@media screen and (min-width: 768px) and (max-width: 1023px) {
+    .logo-img {
+        flex: 1;
+    }
+
+    .icons-msg {
+        justify-content: center;
+    }
+}
+
+@media screen and (max-width: 767px) {
+
+    .logo-img {
+        display: none;
+    }
+
+    .navBar {
+        height: 38px;
+    }
+
+    .box-icons {
+        width: 20px;
+        height: 20px;
+    }
+
+    .box-icons .fa-gear {
+        font-size: 12.73px;
+    }
+
+    .box-icons .fa-envelope {
+        font-size: 11.31px;
+    }
+
+    .help-text {
+        font-size: 12px;
+        font-weight: 900;
+        line-height: 18px;
+        letter-spacing: 0.02em;
+
+    }
+}

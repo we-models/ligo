@@ -15,13 +15,14 @@ class FieldRepository extends BaseRepository implements BaseRepositoryInterface
     protected array $fields = [
         'name', 'object_type', 'layout', 'type',
         'options' , 'default', 'tab', 'order', 'slug',
-        'accept', 'required', 'format', 'by_line', 'description'
+        'accept', 'required', 'description', 'format', 'show_tab_name',
+        'width'
     ];
 
     /**
      * @var array
      */
-    public array $includes = [BUSINESS_IDENTIFY, 'type', 'object_type', 'tab' ];
+    public array $includes = ['type', 'object_type', 'tab' ];
 
     /**
      * @return array
@@ -33,17 +34,17 @@ class FieldRepository extends BaseRepository implements BaseRepositoryInterface
             'object_type' => ['name' => 'Object type'],
             'name' =>        ['name' => __('Name')],
             'description' =>        ['name' => __('Description')],
+            'format' =>        ['name' => __('Format')],
+            'show_tab_name' =>    ['name' => __('Show tab name')],
             'slug' => ['name' => __('Slug')] ,
             'layout' =>        ['name' => __('Layout')],
             'type' =>        ['name' => __('Type')],
             'accept' => ['name' => __('Accept')],
             'options' =>        ['name' => __('Options')],
             'tab' =>        ['name' => __('Tab')],
-            'format' => ['name' => __('Format')],
-            'by_line' => ['name' => __('By line')],
             'created_at'=>   ['name' => __('Created at')],
-            'business' =>   ['name' => __('Business')],
-            'required' => ['name' => __('Required')]
+            'required' => ['name' => __('Required')],
+            'width' =>        ['name' => __('Width')],
         ];
     }
     /**
