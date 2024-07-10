@@ -63,7 +63,7 @@ class ObjectController extends BaseController implements MainControllerInterface
     public function index(Request $request): View|Factory|Application
     {
         $obj = new $this->object();
-        $objectType = ObjectType::find($request->all()['object_type']);
+        $objectType = ObjectType::find($request->all()['object_type'] ?? null);
         if (! isset($objectType)) {
             abort(404);
         }

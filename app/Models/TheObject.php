@@ -16,7 +16,7 @@ class TheObject extends BaseModel implements BaseModelInterface
     /**
      * @var string[]
      */
-    public $fillable = ['name',  'description','excerpt', 'object_type', 'visible', 'parent', 'internal_id'];
+    public $fillable = ['name',  'description','excerpt', 'object_type', 'visible', 'owner', 'parent', 'internal_id'];
 
     /**
      * @var string
@@ -26,7 +26,7 @@ class TheObject extends BaseModel implements BaseModelInterface
     /**
      * @var array|string[]
      */
-    public array $sortable = ['name', 'description', 'excerpt', 'visible', 'parent', 'created_at', 'internal_id'];
+    public array $sortable = ['name', 'description', 'excerpt', 'visible', 'owner', 'parent', 'created_at', 'internal_id'];
 
     protected $hidden = ['updated_at', 'deleted_at'];
 

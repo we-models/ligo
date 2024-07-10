@@ -12,12 +12,12 @@ class ObjectRepository extends BaseRepository implements BaseRepositoryInterface
     /**
      * @var array|string[]
      */
-    protected array $fields =['name', 'description', 'excerpt', 'object_type', 'visible', 'parent', 'internal_id'];
+    protected array $fields =['name', 'description', 'excerpt', 'object_type', 'visible', 'owner', 'parent', 'internal_id'];
 
     /**
      * @var array
      */
-    public array $includes = ['parent', 'object_type', 'images'];
+    public array $includes = ['owner', 'parent', 'object_type', 'images'];
 
     /**
      * @return array

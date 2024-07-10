@@ -52,10 +52,13 @@ class ObjectController extends Controller
         }
         $objects = $this->objectRepository->search($rq->search);
 
-        $enable = $input['enabled'] ?? 1;
-        $objects = $objects->where('visible', $enable);
+        if(isset($input['enabled'])){
+            $enable = (bool) $input['enabled'] ? 1 : 0;
+            $objects = $objects->where('visible', $enable);
+        }
 
-        if(isset($input['owners'])){
+
+        if(isset($input['owners']) && $input['owners'] != 0){
             $objects->whereIn('owner', explode(',', $input['owners']));
         }
         if(isset($input['relation']) &&  $input['relation'] == 'null'){
@@ -66,7 +69,10 @@ class ObjectController extends Controller
 //            if(empty($rl)) throw new \Exception(__("Relation not found") . " " . $input['relation'] );
 //        }
 
-        $can_get = auth()->user()->hasPermissionTo('object.all');
+        $can_get = auth()->user()->roles()->whereHas('permissions', function ($query) {
+            $query->where('name', 'object.all');
+        })->exists();
+        //$can_get = auth()->user()->hasPermissionTo('object.all');
         $objects = $objects->where(function($q) use($objectType, $input, $can_get){
             foreach ($objectType as $ot){
                 $q->orWhere(function($q) use ($ot, $input, $can_get){
@@ -93,10 +99,10 @@ class ObjectController extends Controller
             $objects = $this->filterObjects($objects, $conditions);
         }
 
-        $objects = $objects->sortable()->paginate($rq->paginate)->toArray();
+         $objects = $objects->sortable()->paginate($rq->paginate)->toArray();
 
         if(isset($input['get_fields'])){
-            if($input['get_fields'] == 0) return $objects;
+           if($input['get_fields'] == 0) return $objects;
         }
 
         $objects['data'] = array_map(fn ($object) => array_filter($object, fn ($v) => $v !== null), $objects['data']);
@@ -146,7 +152,11 @@ class ObjectController extends Controller
                         $left = explode('.', $exp->left);
                         if(count($left) > 1){
                             $exp->{'build'} = true;
-                            $q = $q->where($this->reFilter($exp));
+                            if(isset($exp->expressions)){
+                                $q = $q->where($this->reFilter($exp));
+                            }elseif ($exp->layout !== 'base'){
+                                $q = $q->whereHas($exp->layout == 'relation'? RV : FV, $this->reFilter($exp));
+                            }
                         }else{
                             if(isset($exp->expressions)){
                                 $q = $q->where($this->reFilter($exp));
@@ -222,7 +232,18 @@ class ObjectController extends Controller
             $left = explode('.', $expression->left);
 
             if(count($left) > 1 && isset($expression->build)){
+                $left = array_shift($lefts);
+                $expression->left = implode('.', $lefts);
+                if($expression->layout == 'relation'){
+                    $rl = ObjectTypeRelation::query()->where('slug', $left)->first();
+                    if(empty($rl)){
+                        throw new \Exception(__("Relation not found") . " " . $left);
+                    }
 
+                    $q = $q->where(OB_TYPE, $rl->relation);
+
+                    $q = $q->whereHas(RV, $this->reFilter($expression));
+                }
             }else{
                 if($expression->layout == 'relation'){
                     $rl = ObjectTypeRelation::query()->where('slug', $expression->left)->first();
