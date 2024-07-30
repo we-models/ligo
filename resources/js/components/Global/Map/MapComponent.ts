@@ -1,5 +1,7 @@
 import {nextTick, onMounted, ref} from "vue";
 import cts from "@/components/Global/Constants";
+import { GoogleMap } from "vue3-google-map";
+
 
 export default {
     emits: ["onChange"],
@@ -15,6 +17,7 @@ export default {
         const longitude = ref<number>(0);
         const search = ref<string>("");
         const show_map = ref<boolean>(false);
+
 
         /*
          * assign prop values
@@ -78,73 +81,77 @@ export default {
          *
          */
         const createMap = async () => {
-            // if(this.latitude === 0 && this.longitude === 0){
-            //     this.getCurrentLocation();
-            // }
-            //
-            // let input = this.$el.querySelector(".pac-input");
-            // let searchBox = new google.maps.places.SearchBox(input);
-            //
-            // let center = { lat: this.latitude, lng: this.longitude };
-            //
-            // this.map = new google.maps.Map(this.$el.querySelector(".map"), {
-            //     center: center,
-            //     zoom: 20,
-            // });
-            //
-            // this.map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
-            //
-            // this.map.addListener("bounds_changed", () => {
-            //     searchBox.setBounds(this.map.getBounds());
-            // });
-            //
-            // searchBox.addListener("places_changed", () => {
-            //     const places = searchBox.getPlaces();
-            //
-            //     if (places.length === 0) {
-            //         return;
-            //     }
-            //
-            //     // For each place, get the icon, name and location.
-            //     const bounds = new google.maps.LatLngBounds();
-            //
-            //     places.forEach((place) => {
-            //         if (!place.geometry || !place.geometry.location) {
-            //             return;
-            //         }
-            //         if (place.geometry.viewport) {
-            //             bounds.union(place.geometry.viewport);
-            //         } else {
-            //             bounds.extend(place.geometry.location);
-            //         }
-            //     });
-            //     this.map.fitBounds(bounds);
-            // });
-            //
-            // this.setMarker()
+            if(latitude.value === 0 && longitude.value === 0){
+
+                getCurrentLocation();
+            }
+
+
+            let input:any = document.querySelector(".pac-input");
+            let searchBox = new google.maps.places.SearchBox(input);
+
+            let center = { lat: latitude.value, lng: longitude.value };
+
+            map.value = new google.maps.Map(document.querySelector(".map"), {
+                center: center,
+                zoom: 20,
+            });
+
+            map.value.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
+
+            map.value.addListener("bounds_changed", () => {
+                searchBox.setBounds(map.value.getBounds());
+            });
+
+            searchBox.addListener("places_changed", () => {
+                const places = searchBox.getPlaces();
+
+                if (places.length === 0) {
+                    return;
+                }
+
+                // For each place, get the icon, name and location.
+                const bounds = new google.maps.LatLngBounds();
+
+                places.forEach((place) => {
+                    if (!place.geometry || !place.geometry.location) {
+                        return;
+                    }
+                    if (place.geometry.viewport) {
+                        bounds.union(place.geometry.viewport);
+                    } else {
+                        bounds.extend(place.geometry.location);
+                    }
+                });
+                map.value.fitBounds(bounds);
+            });
+
+            setMarker()
+
+
         };
 
         /**
          *
          */
         const setMarker = () => {
-            // let marker = new google.maps.Marker({
-            //     map: this.map
-            // });
-            //
-            // let center = {
-            //     lat : this.latitude,
-            //     lng : this.longitude
-            // };
-            //
-            // marker.setPosition(center);
-            //
-            // this.map.addListener('click', (event) =>{
-            //     let clickedLocation = event.latLng;
-            //     marker.setPosition(clickedLocation);
-            //     this.latitude = clickedLocation.lat();
-            //     this.longitude = clickedLocation.lng();
-            // });
+            let marker = new google.maps.Marker({
+                map: map.value
+            });
+
+            let center = {
+                lat : latitude.value,
+                lng : longitude.value
+            };
+
+            marker.setPosition(center);
+
+            map.value.addListener('click', (event) =>{
+                let clickedLocation = event.latLng;
+                marker.setPosition(clickedLocation);
+                latitude.value = clickedLocation.lat();
+                longitude.value = clickedLocation.lng();
+            });
         };
 
         /**

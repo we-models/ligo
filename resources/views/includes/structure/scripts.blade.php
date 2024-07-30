@@ -129,3 +129,4 @@
     }
 
 </script>
+<script src="https://maps.googleapis.com/maps/api/js?key={{ getConfigValue('GOOGLE_MAPS_KEY' ) }}&libraries=places"></script>

@@ -3,6 +3,7 @@
 // use App\Http\Controllers\ApiControllers\ChatController;
 use App\Http\Controllers\ApiControllers\ImageFileController;
 use App\Http\Controllers\ApiControllers\ObjectController;
+use App\Http\Controllers\ApiControllers\GoogleMapsController;
 use App\Http\Controllers\ApiControllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
@@ -38,7 +39,8 @@ Route::prefix('/user')->group(function (){
         Route::get('/logout', [UserController::class, 'logout'])->name('api.user.logout');
         Route::get('/is-logged', [UserController::class, 'is_logged'])->name('api.user.is_logged');
         Route::get('/{id}', [UserController::class, 'show'])->name('api.user.show');
-        Route::post('/profile', [UserController::class, 'profile'])->name('api.user.profile');
+        Route::get('/profile', [UserController::class, 'profile'])->name('api.user.profile');
+        Route::post('/profile', [UserController::class, 'profileUpdate'])->name('api.user.profile');
 
     });
 });
@@ -59,6 +61,12 @@ Route::middleware(['auth:api', 'verified'])->group(function (){
     Route::post('/object/store', [ObjectController::class, 'store'])->name('api.object.store');
     Route::get('/object/available', [ObjectController::class, 'getAvailableTerms'] )->name('api.object.available');
     Route::get('/object/{id}', [ObjectController::class, 'show'])->name('api.object.show');
+
+
+    Route::prefix('/maps')->group(function (){
+        Route::post('/predictions', [GoogleMapsController::class, 'getPredictions']);
+        Route::post('/place-details', [GoogleMapsController::class, 'getPlaceDetailsByPlaceId']);
+    });
 
     // Route::get('/comment/all', [CommentController::class, 'all'])->name('api.comment.all');
     // Route::get('comment/rating_types', [CommentController::class, 'rating_types'])->name('api.comment.rating_types');

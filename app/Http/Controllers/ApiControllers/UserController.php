@@ -106,16 +106,18 @@ class UserController extends BaseController
 
             $user = User::query()->where('email', $input['email'])->count();
             if($user > 0){
-                throw __('user already exists');
+                throw new Exception(__('user already exists')) ;
+
             }
 
             $input['code'] = generateUserCode();
-
+            $name = isset($input['name']) ? $input['name'] : '';
             $user = User::query()->create([
-                'name' => $input['name'] ?? '',
+                'name' => $name,
                 'email' => $input['email'],
                 'password' => Hash::make($input['password']),
-                'code' => $input['code']
+                'code' => $input['code'],
+                'is_app' => 1
             ]);
 
             $object = ObjectType::query()->where('slug', 'regusu_cli_01')->first();
@@ -123,7 +125,7 @@ class UserController extends BaseController
             if($object == null) throw __('object data not exists');
 
             $object = TheObject::query()->create([
-                'name' =>  $input['name'] . " " . $input['code'],
+                'name' =>  $name,
                 'description' => '',
                 'excerpt' => '',
                 'object_type' => $object->id,
@@ -224,6 +226,43 @@ class UserController extends BaseController
 
     public function profile(Request $request){
 
+        try {
+            $user = User::query()->find(auth()->user()->getAuthIdentifier());
+            if($user == null) throw __('user not exists');
+
+            $objectType = ObjectType::query()->where('slug', 'regusu_cli_01')->first();
+            if($objectType == null) throw __('object type not exists');
+
+            $object = TheObject::query()->where([
+                'object_type' => $objectType->id,
+                'owner' => $user->id
+            ])->latest()->first();
+
+            if($object == null) throw __('object data not exists');
+            $objects = $objects->toArray();
+            $objects = array_map(function($object){
+                $object['custom_fields'] = getCustomFieldsRelations(
+                    "object_type=" . $object['object_type']['id'],
+                    $this,
+                    $object['id'],
+                    false,
+                    true
+                );
+                $object['has_custom_fields'] = count($object['custom_fields']) > 0;
+                return $object;
+            }, $objects);
+
+            return response()->json([
+                'profile' => $object
+            ]);
+
+        }catch (\Throwable $error){
+            return response()->json(["error" => $error->getMessage()], status: 403);
+        }
+    }
+
+    public function profileUpdate(Request $request){
+
         $input = $request->all();
 
         try {
@@ -260,24 +299,26 @@ class UserController extends BaseController
             }
 
 
-            if(!empty($input['name'])){
+            if(isset($input['name']) && !empty($input['name'])){
                 $object = $this->detachField($object, 'regusu_cli_04');
                 $object = $this->fillField($object, 'regusu_cli_04', $input['name']);
             }
 
-            if(!empty($input['lastname'])){
+            if(isset($input['lastname']) && !empty($input['lastname'])){
                 $object = $this->detachField($object, 'regusu_cli_05');
                 $object = $this->fillField($object, 'regusu_cli_05', $input['lastname']);
             }
 
-            if(!empty($input['email'])){
+            if(isset($input['email']) && !empty($input['email'])){
+                $userExist = User::query()->where('email',$input['email'])->first();
+                if($userExist != null) throw __('user email already exists');
                 $object = $this->detachField($object, 'regusu_cli_03');
                 $object = $this->fillField($object, 'regusu_cli_03', $input['email']);
             }
 
             if(!empty($img)){
-                $object = $this->detachField($object,'glo_fot_perf' );
-                $object = $this->fillField($object, 'glo_fot_perf', $img['image']->id);
+                $object = $this->detachField($object,'regusu_cli_10' );
+                $object = $this->fillField($object, 'regusu_cli_10', $img['image']->id);
             }
 
             $all_relations = [

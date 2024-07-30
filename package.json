@@ -27,6 +27,7 @@
     },
     "dependencies": {
         "@fortawesome/fontawesome-free": "^6.5.1",
+        "@types/google.maps": "^3.55.12",
         "date.js": "^0.3.3",
         "dropzone": "^6.0.0-beta.2",
         "firebase": "^10.8.0",
@@ -39,6 +40,7 @@
         "uuid": "^9.0.1",
         "vite-plugin-static-copy": "^1.0.1",
         "vue-i18n": "^9.10.2",
-        "vue-star-rating": "^1.7.0"
+        "vue-star-rating": "^1.7.0",
+        "vue3-google-map": "^0.20.0"
     }
 }

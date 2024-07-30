@@ -99,7 +99,12 @@ class ObjectController extends Controller
             $objects = $this->filterObjects($objects, $conditions);
         }
 
-         $objects = $objects->sortable()->paginate($rq->paginate)->toArray();
+         $objects = $objects->sortable();
+        //  if(isset($input['page'])){
+            $objects = $objects->paginate($rq->paginate)->toArray();
+        //  }else{
+        //     $objects = $objects->get()->toArray();
+        //  }
 
         if(isset($input['get_fields'])){
            if($input['get_fields'] == 0) return $objects;
