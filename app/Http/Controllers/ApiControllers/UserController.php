@@ -175,10 +175,10 @@ class UserController extends BaseController
         // session([BUSINESS_IDENTIFY =>  $request[BUSINESS_IDENTIFY]]);
         $user = User::query()->where('email', $request['email'])->first();
         if(empty($user)) response()->json(['error' => __('User not allowed')], status: 404);
-        $user->is_app = true;
+        // $user->is_app = true;
         $request['is_app'] = true;
         setEmailConfiguration();
-        $status = Password::sendResetLink($request->only('email', 'is_app'));
+        $status = Password::sendResetLink($request->only('email'));
 
         return $status === Password::RESET_LINK_SENT ?  response()->json(['success' => true]) : throw new Exception($status);
     }

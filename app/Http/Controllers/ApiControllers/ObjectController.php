@@ -124,6 +124,8 @@ class ObjectController extends Controller
             return $object;
         }, $objects['data']);
 
+        $objects['data'] = simplifyData($objects['data']);
+
         return $objects;
     }
 

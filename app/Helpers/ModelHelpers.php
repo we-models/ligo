@@ -388,6 +388,65 @@ function getCustomFieldsRelations(string $parameters, $element, int $object = 0,
 }
 
 
+function simplifyData($data)
+{
+    $currentData = $data;
+    $data = array_map (function($object) {
+
+        $fieldsDelete = [
+            'object_type',
+            'created_at',
+            'images',
+            'internal_id',
+            'width',
+            'format',
+            'order',
+            'show_tab_name',
+            'type',
+            'relation',
+            'description',
+            'editable',
+            'type_relationship',
+            'data',
+            'filling_method',
+            'options',
+            'accept',
+            'default',
+            'structure'
+        ];
+
+        foreach ($fieldsDelete as $key => $field) {
+            if(isset($object[$field])){
+                unset($object[$field]);
+            }
+        }
+
+        if(isset($object['has_custom_fields']) && !$object['has_custom_fields']){
+            unset($object['custom_fields'] );
+            unset($object['has_custom_fields'] );
+        }
+
+        if(isset($object['custom_fields'])){
+            $object['custom_fields'] = simplifyData($object['custom_fields']);
+        }
+
+        if(isset($object['fields'])){
+            $object['fields'] = simplifyData($object['fields']);
+        }
+
+        if(isset($object['entity'])){
+            $object['entity'] = simplifyData($object['entity']);
+        }
+
+
+
+        return removeNull($object, true);
+    }, $data);
+
+    return $data;
+}
+
+
 /**
  * @param int $length
  * @return string
