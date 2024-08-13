@@ -11,7 +11,10 @@ use App\Models\ObjectTypeRelation;
 use App\Models\SystemConfiguration;
 use App\Models\TheObject;
 use App\Models\User;
+use App\Models\Field;
 use App\Repositories\BaseRepository;
+use Paymentez\Paymentez;
+use Paymentez\Exceptions\PaymentezErrorException;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -412,7 +415,9 @@ function simplifyData($data)
             'options',
             'accept',
             'default',
-            'structure'
+            'structure',
+            'excerpt',
+            'owner'
         ];
 
         foreach ($fieldsDelete as $key => $field) {
@@ -440,7 +445,7 @@ function simplifyData($data)
 
 
 
-        return removeNull($object, true);
+        return is_array($object) ? removeNull($object, true) : $object;
     }, $data);
 
     return $data;
@@ -633,4 +638,167 @@ function getGroupsOfConfiguration(){
 
 
     return $group;
+}
+
+function getFieldValue($object, $slug){
+
+    $field_db = Field::query()->where(['slug'=> $slug, 'enable' => true])->first();
+    if(!empty($field_db)) {
+        $value = $object->field_value()->where('field', $field_db->id)->first();
+        return $value ? $value->pivot->value : null;
+    }
+
+    return null;
+}
+
+
+function fillField($object, $slug, $value){
+    $field_db = Field::query()->where(['slug'=> $slug, 'enable' => true])->first();
+    if(!empty($field_db)) $object->field_value()->attach($field_db->id, ['value' => $value]);
+    return $object;
+}
+
+function detachField($object, $slug){
+    $field_db = Field::query()->where(['slug'=> $slug, 'enable' => true])->first();
+    $object->field_value()->detach($field_db->id);
+    return $object;
+}
+
+
+function addPaymentez($card,$owner){
+
+    if(isset($card['number'])){
+        try {
+            $user = User::find($owner);
+            $applicationCode = getConfigValue('PAYMENTEZ_APP_CODE_CLIENT');
+            $applicationKey = getConfigValue('PAYMENTEZ_APP_KEY_CLIENT');
+            $productionEnable = filter_var(getConfigValue('PAYMENTEZ_PRODUCTION_MODE'), FILTER_VALIDATE_BOOLEAN);
+
+            if (empty($applicationCode) || empty($applicationKey)) {
+                throw new Exception(__("Incorrect credentials"));
+            }
+
+            Paymentez::init($applicationCode, $applicationKey,$productionEnable);
+
+
+            if ($productionEnable) {
+                $baseURI = getConfigValue('PAYMENTEZ_ENDPOINT_PROD');
+            }else{
+                $baseURI = getConfigValue('PAYMENTEZ_ENDPOINT_STAGING');
+            }
+
+            $baseURI .= "/v2/card/add";
+
+            $data = [];
+
+            $body =[
+                'user' => [
+                    'id' => (string) $user->id,
+                    'email' => $user->email
+                    ],
+                'card' => $card
+            ];
+
+            //REGISTER CARD IN PAYMENTEZ
+            $response = httpPostPaymentez($baseURI,$body);
+
+            if (isset($response['card'])) {
+
+                //DON'T SAVE CARD IF HAS STATUS REJECTED
+                if($response['card']['status'] == 'rejected') {
+                    throw new Exception(__("status card rejected"));
+                }
+                $data = $response['card'];
+                $lastNumbersCC = substr($card['number'], -4);
+                $firstNumbersBin = substr($response['card']['bin'], 0, 4);
+                $lastNumbersBin = substr($response['card']['bin'], -2);
+                $data['name'] = $firstNumbersBin.'-'.$lastNumbersBin.'xx-xxxx-'.$lastNumbersCC;
+            }
+
+            if(isset($response['error']) && strpos($response['error']['type'], "Card already added") !== false){
+                $token = str_replace("Card already added: ", "", $response['error']['type']);
+                deletePaymentez(null,$owner,$token);
+                $data = addPaymentez($card,$owner);
+            }
+
+            return $data;
+        } catch (\Throwable $e) {
+            return $e->getMessage();
+        }
+    }else{
+        return null;
+    }
+}
+
+function updatePaymentez($object,$data,$owner){
+
+    try {
+
+        $dataDelete = deletePaymentez($object,$owner);
+
+        $data = addPaymentez($data,$owner);
+
+        return $data;
+    } catch (\Throwable $e) {
+        $data['token'] = '';
+        return $data;
+    }
+
+}
+
+function deletePaymentez($object = null,$owner,$token = null){
+
+    try {
+
+        if(!$token && $object){
+            $token = getFieldValue($object, 'card_token');
+            detachField($object, 'card_token');
+        }
+
+        $user = User::find($owner);
+        $user =['id' => (string) $user->id, 'email' => $user->email ];
+        $applicationCode = getConfigValue('PAYMENTEZ_APP_CODE_SERVER');
+        $applicationKey = getConfigValue('PAYMENTEZ_APP_KEY_SERVER');
+        $productionEnable = filter_var(getConfigValue('PAYMENTEZ_PRODUCTION_MODE'), FILTER_VALIDATE_BOOLEAN);
+
+        if (empty($applicationCode) || empty($applicationKey)) {
+            return $data;
+        }
+
+        $deleteCard = null;
+
+        Paymentez::init($applicationCode, $applicationKey,$productionEnable);
+        if ($token != '' && $token != null) {
+            $card = Paymentez::card();
+            $deleteCard = $card->delete($token, $user);
+        }
+
+        return $deleteCard;
+    } catch (\Throwable $e) {
+        $data['token'] = '';
+        return $data;
+    }
+
+}
+
+function httpPostPaymentez($url,$data) {
+    $auth_token = Paymentez::auth();
+    $body = json_encode($data);
+    $userAgent = getConfigValue('PAYMENTEZ_USERAGENT');
+    $curl = curl_init();
+    curl_setopt_array($curl, array(
+        CURLOPT_URL => $url,
+        CURLOPT_USERAGENT => $userAgent,
+        CURLOPT_HTTPHEADER => array(
+            'Content-Type:application/json',
+            'Auth-Token:' . $auth_token),
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_TIMEOUT => 90,
+        CURLOPT_POST => true,
+        CURLOPT_POSTFIELDS => $body
+    ));
+    $response = curl_exec($curl);
+    $err = curl_error($curl);
+    curl_close($curl);
+    return json_decode($response,true);
 }

@@ -59,8 +59,10 @@ Route::middleware(['auth:api', 'verified'])->group(function (){
     Route::get('/object/tabs', [ObjectController::class, 'getTabs'])->name('api.object.tabs');
     Route::get('/object/new', [ObjectController::class, 'getNew'])->name('api.object.new');
     Route::post('/object/store', [ObjectController::class, 'store'])->name('api.object.store');
+    Route::post('object/paymentez', [ObjectController::class, 'paymentezMethodCard'])->name('api.paymentez.card');
     Route::get('/object/available', [ObjectController::class, 'getAvailableTerms'] )->name('api.object.available');
     Route::get('/object/{id}', [ObjectController::class, 'show'])->name('api.object.show');
+    Route::delete('/object/{id}',   [ObjectController::class, 'destroy'])->name('api.object.delete');
 
 
     Route::prefix('/maps')->group(function (){

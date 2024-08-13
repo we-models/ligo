@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d589bf8ab8ffd873331a6cb52a7664bd",
+    "content-hash": "bc12f3f621f7b1126166f46961e10468",
     "packages": [
         {
             "name": "barryvdh/laravel-dompdf",
@@ -4293,6 +4293,46 @@
                 "source": "https://github.com/paragonie/sodium_compat/tree/v1.20.1"
             },
             "time": "2024-04-05T21:00:10+00:00"
+        },
+        {
+            "name": "paymentez/sdk",
+            "version": "1.3.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/paymentez/pg-php-sdk.git",
+                "reference": "9bcd10cd7dee7a2f8fd7151b952a8af03c8986ff"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/paymentez/pg-php-sdk/zipball/9bcd10cd7dee7a2f8fd7151b952a8af03c8986ff",
+                "reference": "9bcd10cd7dee7a2f8fd7151b952a8af03c8986ff",
+                "shasum": ""
+            },
+            "require": {
+                "guzzlehttp/guzzle": "^7.4.2"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^7"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Paymentez\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "authors": [
+                {
+                    "name": "Developer Team",
+                    "email": "dev@paymentez.com"
+                }
+            ],
+            "description": "Paymentez PHP Client",
+            "support": {
+                "issues": "https://github.com/paymentez/pg-php-sdk/issues",
+                "source": "https://github.com/paymentez/pg-php-sdk/tree/v1.3.0"
+            },
+            "time": "2022-06-09T22:08:08+00:00"
         },
         {
             "name": "pbmedia/laravel-ffmpeg",
@@ -11914,5 +11954,5 @@
         "ext-pdo": "*"
     },
     "platform-dev": [],
-    "plugin-api-version": "2.6.0"
+    "plugin-api-version": "2.2.0"
 }

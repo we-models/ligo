@@ -16,7 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Exception;
 
-class ObjectController extends Controller
+class ObjectController extends BaseController
 {
     /**
      * @var ObjectRepository
@@ -61,13 +61,16 @@ class ObjectController extends Controller
         if(isset($input['owners']) && $input['owners'] != 0){
             $objects->whereIn('owner', explode(',', $input['owners']));
         }
+        if(isset($input['user_owner']) && $input['user_owner'] != 0){
+            $objects->where('owner', auth()->user()->getAuthIdentifier());
+        }
         if(isset($input['relation']) &&  $input['relation'] == 'null'){
             unset($input['relation']);
         }
-//        if($objectType['type'] == 'post' && isset($input['relation'])){
-//            $rl = ObjectTypeRelation::query()->where('slug', $input['relation'] )->first();
-//            if(empty($rl)) throw new \Exception(__("Relation not found") . " " . $input['relation'] );
-//        }
+        // if($objectType['type'] == 'post' && isset($input['relation'])){
+        //     $rl = ObjectTypeRelation::query()->where('slug', $input['relation'] )->first();
+        //     if(empty($rl)) throw new \Exception(__("Relation not found") . " " . $input['relation'] );
+        // }
 
         $can_get = auth()->user()->roles()->whereHas('permissions', function ($query) {
             $query->where('name', 'object.all');
@@ -100,11 +103,12 @@ class ObjectController extends Controller
         }
 
          $objects = $objects->sortable();
-        //  if(isset($input['page'])){
+         if(isset($input['all_object'])){
+            $objects = $objects->get()->toArray();
+            return $objects;
+         }else{
             $objects = $objects->paginate($rq->paginate)->toArray();
-        //  }else{
-        //     $objects = $objects->get()->toArray();
-        //  }
+         }
 
         if(isset($input['get_fields'])){
            if($input['get_fields'] == 0) return $objects;
@@ -310,7 +314,6 @@ class ObjectController extends Controller
         try {
             DB::beginTransaction();
             $object = $this->saveObject($data);
-            $object = $this->setNewObject($object);
             $this->saveManipulation($object);
 
             return response(__('Success'), 200);
@@ -329,6 +332,10 @@ class ObjectController extends Controller
      */
     function saveObject($data){
         $owner = auth()->user()->getAuthIdentifier();
+
+        if(isset($data['pay_method'])){
+            $data = paymentezMethod($data);
+        }
 
         if($data['id'] == 0){
             //Create a base object
@@ -395,7 +402,6 @@ class ObjectController extends Controller
                 if($relations == 0 && in_array($field_relation['filling_method'], ['creation', 'all'])){
                     //If object relation not exists create;
                     $obj = $this->saveObject($field_relation['entity']);
-                    $obj = $this->setNewObject($obj);
                     $relations = [$obj->id];
                     $this->saveManipulation($obj);
 
@@ -405,7 +411,6 @@ class ObjectController extends Controller
                     if($rl['id'] == 0 && in_array($field_relation['filling_method'], ['creation', 'all'])){
                         //If object relation not exists create
                         $rl = $this->saveObject($rl);
-                        $rl = $this->setNewObject($rl);
                         $this->saveManipulation($rl);
                         $rl = $rl->toArray();
                     }
@@ -427,16 +432,16 @@ class ObjectController extends Controller
     }
 
     public function setNewObject($obj){
-//        $wp_obj = parseWpData($obj->id);
-//        $wp_obj = syncWp($wp_obj, 'save-object');
-//        $wp_obj = json_decode($wp_obj);
-//        if($wp_obj != null && (isset($wp_obj->Error) || isset($wp_obj->error))){
-//            throw new Exception($wp_obj->Error?? $wp_obj->error);
-//        }
-//        if($wp_obj != null && !isset($wp_obj->Error)){
-//            $obj->wp_id = $wp_obj->post_id;
-//            $obj->save();
-//        }
+       $wp_obj = parseWpData($obj->id);
+       $wp_obj = syncWp($wp_obj, 'save-object');
+       $wp_obj = json_decode($wp_obj);
+       if($wp_obj != null && (isset($wp_obj->Error) || isset($wp_obj->error))){
+           throw new Exception($wp_obj->Error?? $wp_obj->error);
+       }
+       if($wp_obj != null && !isset($wp_obj->Error)){
+           $obj->wp_id = $wp_obj->post_id;
+           $obj->save();
+       }
         return $obj;
     }
 
@@ -632,5 +637,153 @@ class ObjectController extends Controller
 
         }
         return null;
+    }
+
+    function paymentezMethodCard(Request $request){
+
+        try {
+            DB::beginTransaction();
+            $dataCard = $request->all();
+            $owner = auth()->user()->getAuthIdentifier();
+
+            $objectType = ObjectType::query()->where('slug', 'pay_card_01')->first();
+
+            $cardID = null;
+
+            if(isset($dataCard['id'])){
+                $cardID = $dataCard['id'];
+                unset($dataCard['id']);
+            }
+
+
+            if($cardID == null){
+                $data = addPaymentez($dataCard,$owner);
+                $object = $this->objectRepository->create([
+                    'name' => $data['name'] ?? "",
+                    'description' => $data['description'] ?? "",
+                    'excerpt' => $data['excerpt'] ?? "",
+                    'object_type' =>  $objectType->id,
+                    'internal_id' => TheObject::newId($objectType->id),
+                    'visible' => true,
+                    'owner' => $owner
+                ]);
+            }else{
+                $object = $this->objectRepository->find($cardID);
+                $data = updatePaymentez($object,$dataCard,$owner);
+                $object->name = $data['name'] ?? "";
+                $object->save();
+            }
+
+            $fields = [
+                [
+                    'key' => 'card_bin',
+                    'value' =>  'bin'
+                ],
+                [
+                    'key' => 'card_status',
+                    'value' =>  'status'
+                ],
+                [
+                    'key' => 'card_token',
+                    'value' =>  'token'
+                ],
+                [
+                    'key' => 'card_expiry_year',
+                    'value' =>  'expiry_year'
+                ],
+                [
+                    'key' => 'card_expiry_month',
+                    'value' =>  'expiry_month'
+                ],
+                [
+                    'key' => 'card_message',
+                    'value' =>  'message'
+                ],
+                [
+                    'key' => 'card_trans_ref',
+                    'value' =>  'transaction_reference'
+                ],
+                [
+                    'key' => 'card_type',
+                    'value' =>  'type'
+                ],
+                [
+                    'key' => 'card_number',
+                    'value' =>  'number'
+                ],
+                [
+                    'key' => 'card_origin',
+                    'value' =>  'origin'
+                ]
+            ];
+
+            foreach ($fields as $key => $field) {
+                $object = detachField($object, $field['key']);
+                $object = fillField($object, $field['key'], $data[$field['value']]);
+            }
+
+            $objectTypeRegisterUSer = ObjectType::query()->where('slug', 'regusu_cli_01')->first();
+            if($objectTypeRegisterUSer == null) throw __('object type not exists');
+
+            $objectUserRegister = TheObject::query()->where([
+                'object_type' => $objectTypeRegisterUSer->id,
+                'owner' => $owner
+            ])->latest()->first();
+            if($objectUserRegister == null) throw __('object data user register not exists');
+
+            $relation_db = ObjectTypeRelation::query()->where(['slug'=> 'card_user', 'enable' => true] )->first();
+            if(!empty($relation_db) && !empty($objectUserRegister)) {
+                $object->relation_value()->detach();
+                $object->relation_value()->attach($objectUserRegister->id, ['model_type' => TheObject::class, 'relation_object' => $relation_db->id]);
+            }
+
+            DB::commit();
+
+            return $object;
+        } catch (\Throwable $error) {
+            DB::rollBack();
+            return new JsonResponse([
+                'error' => $error->getMessage(),
+                'line' => $error->getLine(),
+                'file' => $error->getFile()
+            ], 403);
+        }
+
+
+
+    }
+
+    function destroy(String $lang, int $id){
+
+        $object = $this->objectRepository->makeModel()->where('id', $id)->first();
+        try {
+            if($object == null){
+                throw new Exception(__('The user can not delete this item'));
+            }
+            DB::beginTransaction();
+
+            $objectType = ObjectType::query()->where('slug', 'pay_card_01')->first();
+
+            if($object->object_type == $objectType->id){
+                $owner = auth()->user()->getAuthIdentifier();
+                $data = deletePaymentez($object,$owner);
+            }
+
+            $this->saveManipulation($object, 'deleted');
+            $object->field_value()->detach();
+            $object->relation_value()->detach();
+            $object->images()->detach();
+            $object->delete();
+            DB::commit();
+            return response()->json(['delete' => 'success']);
+        }catch (Throwable $error){
+            DB::rollBack();
+            return new JsonResponse([
+                'error' => $error->getMessage(),
+                'line' => $error->getLine(),
+                'file' => $error->getFile()
+            ], 403);
+        }
+
     }
 }

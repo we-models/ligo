@@ -58,10 +58,15 @@ class UserController extends BaseController
             $token->delete();
         });
 
+        $objectType = ObjectType::query()->where('slug', 'regusu_cli_01')->first();
+        $object = TheObject::query()->where('owner', $user->id)->where('object_type', $objectType->id)->first();
+
+
         $accessToken = $user->createToken('AuthToken')->accessToken;
 
         return response()->json([
             'user' => Auth::user(),
+            'user_register' => $objectType,
             'access_token' => $accessToken
         ]);
     }
@@ -190,7 +195,7 @@ class UserController extends BaseController
      * @param int $id
      * @throws Exception
      */
-    public function reset(Request $request, String $lang )
+    public function resetOld(Request $request, String $lang )
     {
         $request->validate([
             'token' => 'required',
@@ -213,6 +218,40 @@ class UserController extends BaseController
         );
         // syncWp($request->all(), 'change-password');
         return $status === Password::PASSWORD_RESET ? response()->json(['success' => true]) :  throw new Exception($status);
+    }
+
+    public function reset(Request $request): JsonResponse
+    {
+        // Validar el código y el correo
+        $request->validate([
+            'email' => 'required|email',
+            'code' => 'required|numeric',
+            'password' => 'required|confirmed|min:8',
+        ]);
+
+        // Verificar el código
+        $passwordReset = DB::table('password_resets')
+            ->where('email', $request->email)
+            ->first();
+
+        if (!$passwordReset || !Hash::check($request->code, $passwordReset->token)) {
+            return response()->json(['code' => 'El código de verificación no es válido.'], 403);
+        }
+
+        // Restablecer la contraseña
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user) {
+            return response()->json(['email' => 'No se encontró ningún usuario con ese correo electrónico.'], 403);
+        }
+
+        $user->password = Hash::make($request->password);
+        $user->save();
+
+        // Borrar el código usado
+        DB::table('password_resets')->where('email', $request->email)->delete();
+
+        return response()->json(['success' => true]);
     }
 
     public function logout(Request $request): JsonResponse
@@ -300,25 +339,25 @@ class UserController extends BaseController
 
 
             if(isset($input['name']) && !empty($input['name'])){
-                $object = $this->detachField($object, 'regusu_cli_04');
-                $object = $this->fillField($object, 'regusu_cli_04', $input['name']);
+                $object = detachField($object, 'regusu_cli_04');
+                $object = fillField($object, 'regusu_cli_04', $input['name']);
             }
 
             if(isset($input['lastname']) && !empty($input['lastname'])){
-                $object = $this->detachField($object, 'regusu_cli_05');
-                $object = $this->fillField($object, 'regusu_cli_05', $input['lastname']);
+                $object = detachField($object, 'regusu_cli_05');
+                $object = fillField($object, 'regusu_cli_05', $input['lastname']);
             }
 
             if(isset($input['email']) && !empty($input['email'])){
                 $userExist = User::query()->where('email',$input['email'])->first();
                 if($userExist != null) throw __('user email already exists');
-                $object = $this->detachField($object, 'regusu_cli_03');
-                $object = $this->fillField($object, 'regusu_cli_03', $input['email']);
+                $object = detachField($object, 'regusu_cli_03');
+                $object = fillField($object, 'regusu_cli_03', $input['email']);
             }
 
             if(!empty($img)){
-                $object = $this->detachField($object,'regusu_cli_10' );
-                $object = $this->fillField($object, 'regusu_cli_10', $img['image']->id);
+                $object = detachField($object,'regusu_cli_10' );
+                $object = fillField($object, 'regusu_cli_10', $img['image']->id);
             }
 
             $all_relations = [
@@ -417,7 +456,7 @@ class UserController extends BaseController
             ]);
         }
 
-        $object = $this->fillField($object, 'ad_numcell_04', $input['phone']);
+        $object = fillField($object, 'ad_numcell_04', $input['phone']);
 
         return $object;
     }

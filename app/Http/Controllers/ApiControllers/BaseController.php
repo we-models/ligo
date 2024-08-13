@@ -29,18 +29,6 @@ class BaseController extends Controller
         $this->objectRepository = $objectRepository;
     }
 
-    function fillField($object, $slug, $value){
-        $field_db = Field::query()->where(['slug'=> $slug, 'enable' => true])->first();
-        if(!empty($field_db)) $object->field_value()->attach($field_db->id, ['value' => $value]);
-        return $object;
-    }
-
-    function detachField($object, $slug){
-        $field_db = Field::query()->where(['slug'=> $slug, 'enable' => true])->first();
-        $object->field_value()->detach($field_db->id);
-        return $object;
-    }
-
     public function saveManipulation($model, $status = 'created'){
         $model->manipulated_by()->attach(auth()->user()->getAuthIdentifier(), ['model_type' => get_class($model), 'type' => $status]);
     }
