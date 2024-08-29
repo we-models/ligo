@@ -33,20 +33,22 @@ Route::prefix('/user')->group(function (){
     Route::post('/register', [UserController::class, 'register'])->name('api.user.register');
     Route::post('/recovery', [UserController::class, 'recovery'])->name('api.user.recovery');
     Route::post('/password/reset', [UserController::class, 'reset'])->name('api.user.reset.form');
+    Route::post('/validate-code-reset', [UserController::class, 'validateCodeReset'])->name('api.user.validate.reset');
+    Route::post('/password/reset', [UserController::class, 'reset'])->name('api.user.reset.form');
 
 
     Route::middleware(['auth:api', 'verified'])->group(function (){
         Route::get('/logout', [UserController::class, 'logout'])->name('api.user.logout');
         Route::get('/is-logged', [UserController::class, 'is_logged'])->name('api.user.is_logged');
         Route::get('/{id}', [UserController::class, 'show'])->name('api.user.show');
-        Route::get('/profile', [UserController::class, 'profile'])->name('api.user.profile');
+        Route::get('/profile-info', [UserController::class, 'profile'])->name('api.user.profile');
         Route::post('/profile', [UserController::class, 'profileUpdate'])->name('api.user.profile');
 
     });
 });
 
 Route::middleware(['auth:api', 'verified'])->group(function (){
-    Route::get('/images/{y}/{m}/{b}/{u}/{v}/{i}', [ImageFileController::class, 'getImage'])->name('api.image.getImage');
+    Route::get('/images/{y}/{m}/{u}/{i}', [ImageFileController::class, 'getImage'])->name('api.image.getImage');
     Route::get('/files/{y}/{m}/{b}/{u}/{v}/{f}', [ImageFileController::class, 'getFile'])->name('api.file.getFile');
 
     Route::post('/file/store', [ImageFileController::class, 'fileStore'])->name('api.file.fileStore');
@@ -63,6 +65,9 @@ Route::middleware(['auth:api', 'verified'])->group(function (){
     Route::get('/object/available', [ObjectController::class, 'getAvailableTerms'] )->name('api.object.available');
     Route::get('/object/{id}', [ObjectController::class, 'show'])->name('api.object.show');
     Route::delete('/object/{id}',   [ObjectController::class, 'destroy'])->name('api.object.delete');
+
+    Route::post('/object/validateqr', [ObjectController::class, 'ValidateQr'])->name('api.validate.qr');
+    Route::get('object/qr/{id}', [ObjectController::class, 'getQr'])->name('api.qr');
 
 
     Route::prefix('/maps')->group(function (){

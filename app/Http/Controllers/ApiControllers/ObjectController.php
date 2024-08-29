@@ -11,6 +11,7 @@ use App\Repositories\LogRepository;
 use App\Repositories\ObjectRepository;
 use DateTime;
 use GuzzleHttp\Exception\GuzzleException;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -637,6 +638,54 @@ class ObjectController extends BaseController
 
         }
         return null;
+    }
+
+    public function ValidateQr(Request $request){
+        set_time_limit(180);
+
+        $data = $request->all();
+        try {
+            DB::beginTransaction();
+            $object = $this->objectRepository->find($data['sucursal_id']);
+            $codeQr = getFieldValue($object, 'adnewsuc_11');
+
+            if ($codeQr == $data['code']) {
+                return response(__('QR validate Success'), 200);
+            }
+
+            return response(__('error'), 403);
+        }catch (\Throwable $error){
+            DB::rollBack();
+            return new JsonResponse([
+                'error' => $error->getMessage(),
+                'line' => $error->getLine(),
+                'file' => $error->getFile()
+            ], 403);
+        }
+    }
+
+    public function getQr(String $lang, int $id){
+        set_time_limit(180);
+
+        try {
+            DB::beginTransaction();
+            $object = $this->objectRepository->find($id);
+            $codeQr = getFieldValue($object, 'adnewsuc_11');
+
+            // Generar la imagen QR
+            $qrCode = QrCode::format('png')->size(200)->generate($codeQr);
+
+            // Retornar la imagen QR en respuesta para mostrarla o descargarla
+            return response($qrCode)->header('Content-Type', 'image/png');
+
+        }catch (\Throwable $error){
+            DB::rollBack();
+            return new JsonResponse([
+                'error' => $error->getMessage(),
+                'line' => $error->getLine(),
+                'file' => $error->getFile()
+            ], 403);
+        }
     }
 
     function paymentezMethodCard(Request $request){

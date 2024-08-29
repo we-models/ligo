@@ -14,7 +14,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
-use Intervention\Image\Facades\Image;
+//use Intervention\Image\Facades\Image;
+use Image;
 use Illuminate\Http\UploadedFile;
 
 class BaseController extends Controller

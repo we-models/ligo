@@ -71,13 +71,10 @@ class ImageFileController extends Controller
     }
 
 
-    public function getImage(Request $request,$y, $m, $b, $u, $v, $i){
-
-        $request[BUSINESS_IDENTIFY] = request()->header(BUSINESS_IDENTIFY);
-        session([BUSINESS_IDENTIFY =>  $request[BUSINESS_IDENTIFY]]);
+    public function getImage(Request $request,$y, $m, $u, $i ){
 
         $imgCtrl = new ImageController($this->imageRepository);
-        return $imgCtrl->getImage($request, $y, $m, $b, $u, $v, $i);
+        return $imgCtrl->getImage($request, $y, $m, $u, $i );
     }
 
     public function getFile(Request $request,$y, $m, $b, $u, $v, $i){

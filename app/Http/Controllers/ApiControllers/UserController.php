@@ -61,7 +61,7 @@ class UserController extends BaseController
         $objectType = ObjectType::query()->where('slug', 'regusu_cli_01')->first();
         $object = TheObject::query()->where('owner', $user->id)->where('object_type', $objectType->id)->first();
 
-
+        
         $accessToken = $user->createToken('AuthToken')->accessToken;
 
         return response()->json([
@@ -348,6 +348,11 @@ class UserController extends BaseController
                 $object = fillField($object, 'regusu_cli_05', $input['lastname']);
             }
 
+            if(isset($input['info']) && !empty($input['info'])){
+                $object = detachField($object, 'regusu_cli_12');
+                $object = fillField($object, 'regusu_cli_12', $input['info']);
+            }
+
             if(isset($input['email']) && !empty($input['email'])){
                 $userExist = User::query()->where('email',$input['email'])->first();
                 if($userExist != null) throw __('user email already exists');
@@ -434,7 +439,12 @@ class UserController extends BaseController
 
         }catch (\Throwable $error){
             DB::rollBack();
-            return response()->json(["error" => $error->getMessage()], status: 403);
+            return response()->json(
+                [
+                'error' => $error->getMessage(),
+                'line' => $error->getLine(),
+                'file' => $error->getFile()
+            ], status: 403);
         }
     }
 
