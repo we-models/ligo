@@ -55,7 +55,6 @@ class BaseController extends Controller
 
         $image_name = str_replace('.' . $ext, "", $image_name);
 
-        $business = Business::query()->where('code', session(BUSINESS_IDENTIFY))->first();
         $name = $this->getImageName($directory, $ext,  $image_name );
         $name = str_replace(' ', '_', $name);
 
@@ -71,7 +70,6 @@ class BaseController extends Controller
                 'size' => $image_size,
                 'extension' => $ext,
                 'mimetype' => $image->mime(),
-                'business' => $business->id,
                 'user' => $u,
                 'visibility' => $v,
                 'url' => $this->getImageRoute($y, $m, $u, $v, $name . '.'. $ext),

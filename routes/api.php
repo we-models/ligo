@@ -34,15 +34,16 @@ Route::prefix('/user')->group(function (){
     Route::post('/recovery', [UserController::class, 'recovery'])->name('api.user.recovery');
     Route::post('/password/reset', [UserController::class, 'reset'])->name('api.user.reset.form');
     Route::post('/validate-code-reset', [UserController::class, 'validateCodeReset'])->name('api.user.validate.reset');
-    Route::post('/password/reset', [UserController::class, 'reset'])->name('api.user.reset.form');
+	Route::post('/validate-user-exists', [UserController::class, 'validateUserExists'])->name('api.user.validate.exists');
 
 
     Route::middleware(['auth:api', 'verified'])->group(function (){
         Route::get('/logout', [UserController::class, 'logout'])->name('api.user.logout');
         Route::get('/is-logged', [UserController::class, 'is_logged'])->name('api.user.is_logged');
-        Route::get('/{id}', [UserController::class, 'show'])->name('api.user.show');
-        Route::get('/profile-info', [UserController::class, 'profile'])->name('api.user.profile');
+        Route::get('/profile-info', [UserController::class, 'profile'])->name('api.user.profile.info');
+		Route::get('/my-suscription', [UserController::class, 'mysubscription'])->name('api.user.mysubscription');
         Route::post('/profile', [UserController::class, 'profileUpdate'])->name('api.user.profile');
+		Route::get('/{id}', [UserController::class, 'show'])->name('api.user.show');
 
     });
 });
@@ -62,6 +63,7 @@ Route::middleware(['auth:api', 'verified'])->group(function (){
     Route::get('/object/new', [ObjectController::class, 'getNew'])->name('api.object.new');
     Route::post('/object/store', [ObjectController::class, 'store'])->name('api.object.store');
     Route::post('object/paymentez', [ObjectController::class, 'paymentezMethodCard'])->name('api.paymentez.card');
+	Route::post('object/paymentez-pay', [ObjectController::class, 'paymentezPay'])->name('api.paymentez.pay');
     Route::get('/object/available', [ObjectController::class, 'getAvailableTerms'] )->name('api.object.available');
     Route::get('/object/{id}', [ObjectController::class, 'show'])->name('api.object.show');
     Route::delete('/object/{id}',   [ObjectController::class, 'destroy'])->name('api.object.delete');
@@ -89,6 +91,15 @@ Route::middleware(['auth:api', 'verified'])->group(function (){
 
 
 });
+
+use Illuminate\Support\Facades\Http;
+
+Route::get('/image-proxy', function () {
+    $url = request('url');
+    $response = Http::get($url);
+    return response($response->body())->header('Content-Type', $response->header('Content-Type'));
+})->name('api.image.proxy');
+
 
 // Route::get('/information/{business}', [BC::class, 'information'])->name('business.information');
 

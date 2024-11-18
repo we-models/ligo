@@ -48,6 +48,7 @@ class ObjectController extends BaseController
         $rq = getRequestParams($request);
         $rq->object_type =  explode(',', $request['object_type']);
         $objectType = ObjectType::query()->whereIn('slug', $rq->object_type)->get()->toArray();
+		
         if(empty($objectType)) {
             throw new Exception(__("Object type doesn't exists"));
         }
@@ -88,9 +89,27 @@ class ObjectController extends BaseController
                     }
                 });
             }
-        });
+        }); 
+		
+		if(isset($input['store_from_category']) && $input['store_from_category'] != ''){
 
+            $relation_db = ObjectTypeRelation::query()->where(['slug'=> 'adsucursal_08', 'enable' => true] )->first();
+            $objects = $objects->whereHas('relation_value', function ($query) use ($input,$relation_db) {
+                $query->where('object_relations.relation', $input['store_from_category']);
+                $query->where('object_relations.relation_object', $relation_db->id);
+            });
+        }
+		
+		if(isset($input['establishment_from_store']) && $input['establishment_from_store'] != ''){
 
+            $relation_db = ObjectTypeRelation::query()->where(['slug'=> 'adnewsuc_03', 'enable' => true] )->first();
+            $objects = $objects->whereHas('relation_value', function ($query) use ($input,$relation_db) {
+                $query->where('object_relations.relation', $input['establishment_from_store']);
+                $query->where('object_relations.relation_object', $relation_db->id);
+            });
+        }
+
+		
         if($conditions != ''){
             $conditions = json_decode($conditions);
             $conditions->expressions = array_map(function($exp){
@@ -113,6 +132,10 @@ class ObjectController extends BaseController
 
         if(isset($input['get_fields'])){
            if($input['get_fields'] == 0) return $objects;
+
+           if($input['get_fields'] != 1){
+            $object['custom_fields'] = getfields($objectsTemp, $input['get_fields']);
+           }
         }
 
         $objects['data'] = array_map(fn ($object) => array_filter($object, fn ($v) => $v !== null), $objects['data']);
@@ -834,5 +857,33 @@ class ObjectController extends BaseController
             ], 403);
         }
 
+    }
+	
+	public function paymentezPay(Request $request){
+        set_time_limit(180);
+
+        try {
+            DB::beginTransaction();
+			$data = $request->all();
+			$cardID = $data['card_id'];
+            $objectCard = $this->objectRepository->find($cardID);
+			if($objectCard == null) throw new Exception( __('card not exists'));
+							
+			$subscriptionID = $data['subscription_id'];
+            $objectSubscription = $this->objectRepository->find($subscriptionID);
+			if($objectSubscription == null) throw new Exception( __('card not exists'));
+
+			$owner = auth()->user()->getAuthIdentifier();
+
+            return response()->json(['pago' => 'success']);
+
+        }catch (\Throwable $error){
+            DB::rollBack();
+            return new JsonResponse([
+                'error' => $error->getMessage(),
+                'line' => $error->getLine(),
+                'file' => $error->getFile()
+            ], 403);
+        }
     }
 }

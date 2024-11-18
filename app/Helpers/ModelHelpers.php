@@ -215,6 +215,7 @@ function formatField($field, $object, $showData = true){
         $field['values'] = $field['value'];
         if(!empty($field['value'])){
             $field['values'] = ImageFile::find($field['value']->value);
+			$field['values']['url'] = route('api.image.proxy', ['url' => $field['values']['url'], 'locale' => 'es']);
         }
         $field['entity'] = [$field['slug'] => $field['values']];
         unset($field['values']);
@@ -391,64 +392,86 @@ function getCustomFieldsRelations(string $parameters, $element, int $object = 0,
 }
 
 
-function simplifyData($data)
+function simplifyData($data, $arraySimple= false)
 {
     $currentData = $data;
-    $data = array_map (function($object) {
-
-        $fieldsDelete = [
-            'object_type',
-            'created_at',
-            'images',
-            'internal_id',
-            'width',
-            'format',
-            'order',
-            'show_tab_name',
-            'type',
-            'relation',
-            'description',
-            'editable',
-            'type_relationship',
-            'data',
-            'filling_method',
-            'options',
-            'accept',
-            'default',
-            'structure',
-            'excerpt',
-            'owner'
-        ];
-
-        foreach ($fieldsDelete as $key => $field) {
-            if(isset($object[$field])){
-                unset($object[$field]);
-            }
-        }
-
-        if(isset($object['has_custom_fields']) && !$object['has_custom_fields']){
-            unset($object['custom_fields'] );
-            unset($object['has_custom_fields'] );
-        }
-
-        if(isset($object['custom_fields'])){
-            $object['custom_fields'] = simplifyData($object['custom_fields']);
-        }
-
-        if(isset($object['fields'])){
-            $object['fields'] = simplifyData($object['fields']);
-        }
-
-        if(isset($object['entity'])){
-            $object['entity'] = simplifyData($object['entity']);
-        }
-
-
-
-        return is_array($object) ? removeNull($object, true) : $object;
-    }, $data);
+	//$keys = array_keys($data);
+    // dd($arraySimple);
+	// Comprobar si todos los índices son numéricos
+	//$allNumeric  = array_filter($keys, 'is_int') === $keys;
+	//$arraySimple = $allNumeric;
+	//dd($data);
+    $data = $arraySimple ? removeField($data) : array_map('removeField', $data);
 
     return $data;
+}
+
+function removeField($object) {
+    // dd($object);
+	$fieldsDelete = [
+		'object_type',
+		'created_at',
+		'images',
+		'internal_id',
+		'width',
+		'format',
+		'order',
+		'show_tab_name',
+		'type',
+		'relation',
+		'description',
+		'editable',
+		'type_relationship',
+		'data',
+		'filling_method',
+		'options',
+		'accept',
+		'default',
+		'structure',
+		'excerpt',
+		'owner',
+        'required',
+        'layout',
+        'enable',
+        'visible',
+        'tab'
+		/*
+		,
+		'status',
+		'field',
+		'object'*/
+	];
+
+	foreach ($fieldsDelete as $key => $field) {
+		if(isset($object[$field])){
+			unset($object[$field]);
+		}
+	}
+
+	if(isset($object['has_custom_fields']) && !$object['has_custom_fields']){
+		unset($object['custom_fields'] );
+		unset($object['has_custom_fields'] );
+	}
+
+	if(isset($object['custom_fields'])){
+		$object['custom_fields'] = simplifyData($object['custom_fields']);
+	}
+
+	if(isset($object['fields'])){
+        //dd($object['fields']);
+		$object['fields'] = simplifyData($object['fields']);
+	}
+
+	if(isset($object['entity'])){
+		if(isset($object['entity'][$object['slug']])){
+			$object['entity'][$object['slug']] = simplifyData($object['entity'][$object['slug']],true);
+		}else{	
+			$object['entity'] = simplifyData($object['entity']);
+		}
+	}
+
+
+	return is_array($object) ? removeNull($object, true) : $object;
 }
 
 
@@ -640,6 +663,30 @@ function getGroupsOfConfiguration(){
     return $group;
 }
 
+
+
+function getfields($object, $slugs){
+
+    $fieldSlugs =  explode(',', $slugs);
+    $fields = [];
+    foreach ($fieldSlugs as $key => $slug) {
+        $field_db = Field::query()->where(['slug'=> $slug, 'enable' => true])->first();
+        if(!empty($field_db)) {
+            $value = $object->field_value()->where('field', $field_db->id)->first();
+            $value ? $value->pivot->value : null;
+            array_push($fields,$value);
+        }
+        $relation_db = ObjectTypeRelation::query()->where(['slug' => $slug, 'enable' => true])->first();
+        if(!empty($relation_db)) {
+            $value = $object->relation_value()->where('object_relations.relation_object', $relation_db->id)->get();
+            $value->first() ? $value->toArray() : [null];
+            array_push($fields,$value);
+        }
+    }
+
+    return $fields;
+}
+
 function getFieldValue($object, $slug){
 
     $field_db = Field::query()->where(['slug'=> $slug, 'enable' => true])->first();
@@ -662,6 +709,25 @@ function detachField($object, $slug){
     $field_db = Field::query()->where(['slug'=> $slug, 'enable' => true])->first();
     $object->field_value()->detach($field_db->id);
     return $object;
+}
+
+function benefitFilter(){
+    $relation_db = ObjectTypeRelation::query()
+        ->where(['slug' => 'uso_bene_beneficio', 'enable' => true])
+        ->first();
+	
+	$objectType = ObjectType::query()->where('slug', 'uso_bene')->first();
+
+    // Obtener los más repetidos de la relación
+    $objects = TheObject::where('object_type',$objectType->id)->whereHas('relation_value', function ($query) use ($relation_db) {
+        $query->where('object_relations.relation_object', $relation_db->id);
+    })
+    ->withCount(['relation_value as relation_count' => function ($query) use ($relation_db) {
+        $query->where('object_relations.relation_object', $relation_db->id);
+    }])
+	->select('objects.id')
+    ->orderBy('relation_count', 'desc'); // Ordenar por el más repetido
+	return $objects ? $objects->toArray() : [0];
 }
 
 
