@@ -5,6 +5,9 @@ use App\Models\ObjectType;
 use App\Models\ObjectTypeRelation;
 use App\Models\TheObject;
 use App\Models\Business;
+use App\Repositories\LogRepository;
+use App\Repositories\UserRepository;
+use App\Repositories\ObjectRepository;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Auth\Events\Registered;
@@ -22,6 +25,29 @@ use Exception;
 class UserController extends BaseController
 {
     use SendsPasswordResetEmails;
+	
+	/**
+     * @var LogRepository
+     */
+    private LogRepository $logRepository;
+
+
+    /**
+     * @var UserRepository
+     */
+    private UserRepository $userRepository;
+	
+	/**
+     * @var ObjectRepository
+     */
+    public ObjectRepository $objectRepository;
+	
+	
+	 public function __construct(LogRepository $logRepo, UserRepository $userRepo,ObjectRepository $objectRepo) {
+        $this->logRepository = $logRepo;
+        $this->userRepository = $userRepo;
+		$this->objectRepository = $objectRepo;
+    }
 
 
     /**
@@ -100,6 +126,29 @@ class UserController extends BaseController
             throw new AuthenticationException("Unauthenticated.");
         }
     }
+	
+	public function validateUserExists(Request $request, String $lang ): JsonResponse
+    {
+        try{
+
+            $input = $request->all();
+
+            DB::beginTransaction();
+
+            $user = User::query()->where('email', $input['email'])->count();
+            if($user > 0){
+                throw new Exception(__('user already exists')) ;
+
+            }
+
+            return response()->json(__('user not exists'));
+
+        }catch (\Throwable $error){
+            DB::rollBack();
+            return response()->json(["error" => $error->getMessage()], status: 403);
+        }
+
+    }
 
     public function register(Request $request, String $lang ): JsonResponse
     {
@@ -138,6 +187,11 @@ class UserController extends BaseController
                 'visible' => true,
                 'owner' => $user->id
             ]);
+
+            
+            $object = detachField($object, 'regusu_cli_14');
+            $object = fillField($object, 'regusu_cli_14', "1");
+            
 
             $user->save();
 
@@ -253,6 +307,42 @@ class UserController extends BaseController
 
         return response()->json(['success' => true]);
     }
+	
+	public function show(string $lang, int $id): Response|JsonResponse|Application|ResponseFactory {
+        $fields = (new User)->getFields(true);
+        $user  = $this->userRepository;
+        $user = $user->formatQuery();
+        $user = $user->find($id);
+		
+        if (empty($user)) return response(__('Not found'), 404);
+		
+		$objectType = ObjectType::query()->where('slug', 'regusu_cli_01')->first();
+		if($objectType == null) throw __('object type not exists');
+
+		$object = TheObject::query()->where([
+			'object_type' => $objectType->id,
+			'owner' => $user->id
+		])->latest()->first();
+
+		if($object == null) throw __('object data not exists');
+		$objectUser = $object->toArray();      
+
+		$objectUser['custom_fields'] = getCustomFieldsRelations(
+			"object_type=" . $objectUser['object_type'],
+			$this,
+			$object['id'],
+			false,
+			true
+		);
+		$objectUser['has_custom_fields'] = count($objectUser['custom_fields']) > 0;
+
+		$objectUser = simplifyData($objectUser, true);
+		
+        return response()->json([
+            'user' => $user,
+            'object' => $objectUser,
+        ]);
+    }
 
     public function logout(Request $request): JsonResponse
     {
@@ -277,26 +367,30 @@ class UserController extends BaseController
                 'owner' => $user->id
             ])->latest()->first();
 
-            if($object == null) throw __('object data not exists');
-            $objects = $objects->toArray();
-            $objects = array_map(function($object){
-                $object['custom_fields'] = getCustomFieldsRelations(
-                    "object_type=" . $object['object_type']['id'],
-                    $this,
-                    $object['id'],
-                    false,
-                    true
-                );
-                $object['has_custom_fields'] = count($object['custom_fields']) > 0;
-                return $object;
-            }, $objects);
-
+            if($object == null) throw new \Exception('object data not exists');
+            $objectUser = $object->toArray();      
+				
+			$objectUser['custom_fields'] = getCustomFieldsRelations(
+				"object_type=" . $objectUser['object_type'],
+				$this,
+				$object['id'],
+				false,
+				true
+			);
+			$objectUser['has_custom_fields'] = count($objectUser['custom_fields']) > 0;
+    		//dd($objectUser);
+			$objectUser = simplifyData($objectUser, true);
+			
             return response()->json([
-                'profile' => $object
+                'profile' => $objectUser
             ]);
 
         }catch (\Throwable $error){
-            return response()->json(["error" => $error->getMessage()], status: 403);
+            return response()->json([
+                'error' => $error->getMessage(),
+                'line' => $error->getLine(),
+                'file' => $error->getFile()
+            ], status: 403);
         }
     }
 
@@ -308,8 +402,6 @@ class UserController extends BaseController
             DB::beginTransaction();
             $user = User::query()->find(auth()->user()->getAuthIdentifier());
             if($user == null) throw __('user not exists');
-            $user->name = $input['name'] ?? '' . " " . $input['last_name'] ?? '';
-
 
             $pc = $input['password_current'] ?? null;
             $ps = $input['password'] ?? null;
@@ -320,7 +412,7 @@ class UserController extends BaseController
                 $user->password = Hash::make($input['password']);
                 $pc = $input['password'];
             }
-            $user->save();
+            
 
             $objectType = ObjectType::query()->where('slug', 'regusu_cli_01')->first();
             if($objectType == null) throw __('object type not exists');
@@ -338,14 +430,17 @@ class UserController extends BaseController
             }
 
 
+
             if(isset($input['name']) && !empty($input['name'])){
                 $object = detachField($object, 'regusu_cli_04');
                 $object = fillField($object, 'regusu_cli_04', $input['name']);
+                $user->name = $input['name'];
             }
 
             if(isset($input['lastname']) && !empty($input['lastname'])){
                 $object = detachField($object, 'regusu_cli_05');
                 $object = fillField($object, 'regusu_cli_05', $input['lastname']);
+                $user->lastname = $input['lastname'];
             }
 
             if(isset($input['info']) && !empty($input['info'])){
@@ -353,11 +448,18 @@ class UserController extends BaseController
                 $object = fillField($object, 'regusu_cli_12', $input['info']);
             }
 
+            if(isset($input['active'])){
+                $object = detachField($object, 'regusu_cli_14');
+                $active = filter_var($input['active'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+                $object = fillField($object, 'regusu_cli_14', $active);
+            }
+
             if(isset($input['email']) && !empty($input['email'])){
                 $userExist = User::query()->where('email',$input['email'])->first();
-                if($userExist != null) throw __('user email already exists');
+                if($userExist != null) throw new Exception(__('user email already exists'));
                 $object = detachField($object, 'regusu_cli_03');
                 $object = fillField($object, 'regusu_cli_03', $input['email']);
+                $user->email = $input['email'];
             }
 
             if(!empty($img)){
@@ -388,7 +490,7 @@ class UserController extends BaseController
                     })->first();
                 if(!empty($relation_db) && !empty($relation)) {
                     $object->relation_value()->detach();
-                    $object->relation_value()->attach($relation->id, ['relation_object' => $relation_db->id]);
+                    $object->relation_value()->attach($relation->id, ['relation_object' => $relation_db->id, 'model_type' => TheObject::class]);
                 }
             }
 
@@ -398,11 +500,14 @@ class UserController extends BaseController
 
                 if(!empty($relation_db) && !empty($relationPhone)) {
                     $object->relation_value()->detach();
-                    $object->relation_value()->attach($relationPhone->id, ['relation_object' => $relation_db->id]);
+                    $object->relation_value()->attach($relationPhone->id, ['relation_object' => $relation_db->id, 'model_type' => TheObject::class]);
                 }
+
+                $user->ncontact = $input['phone'];
 
             }
 
+            $user->save();
 
             $this->saveManipulation($object, 'updated');
 
@@ -469,6 +574,55 @@ class UserController extends BaseController
         $object = fillField($object, 'ad_numcell_04', $input['phone']);
 
         return $object;
+    }
+	
+	public function mysubscription(Request $request){
+		
+		try {
+            $user = User::query()->find(auth()->user()->getAuthIdentifier());
+            if($user == null) throw new Exception(throw __('user not exists'));
+
+            $objectType = ObjectType::query()->where('slug', 'regusu_cli_01')->first();
+            if($objectType == null) throw new Exception(throw __('object type not exists'));
+
+            $object = TheObject::query()->where([
+                'object_type' => $objectType->id,
+                'owner' => $user->id
+            ])->latest()->first();
+
+            if($object == null) throw new Exception( __('object data not exists'));
+			
+			$objectTypeSubscription = ObjectType::query()->where('slug', 'newsus_01')->first();
+			//dd($object->relation_value()->get());
+			$objectSubscription = $object->relation_value()->where('object_type',$objectTypeSubscription->id)->first();
+			
+			if($objectSubscription == null) throw new Exception(__('no tiene suscripcion'));
+			
+            $objectSubscription = $objectSubscription->toArray();
+           // dd()
+			$objectSubscription['custom_fields'] = getCustomFieldsRelations(
+				"object_type=" . $objectTypeSubscription->id,
+				$this,
+				$objectSubscription['id'],
+				false,
+				true
+			);
+			$objectSubscription['has_custom_fields'] = count($objectSubscription['custom_fields']) > 0;
+    		
+			$objectSubscription = simplifyData($objectSubscription,true);
+
+            return response()->json([
+                'subscription' => $objectSubscription
+            ]);
+
+        }catch (\Throwable $error){
+            return response()->json([
+                'error' => $error->getMessage(),
+                'line' => $error->getLine(),
+                'file' => $error->getFile()
+            ], status: 403);
+        }
+	
     }
 
 }

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "cfa264161f1bfd85124c42f4a888a1c5",
+    "content-hash": "d5585cafcfebd9f457a9ade5b8a80ef3",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -1909,21 +1909,21 @@
         },
         {
             "name": "intervention/image-laravel",
-            "version": "1.2.0",
+            "version": "1.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Intervention/image-laravel.git",
-                "reference": "d30b62fea3c49896dbf26ea7799e7d718e779310"
+                "reference": "24738a017d42a6fa8d9adabdbd69a2c19c5b0d30"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Intervention/image-laravel/zipball/d30b62fea3c49896dbf26ea7799e7d718e779310",
-                "reference": "d30b62fea3c49896dbf26ea7799e7d718e779310",
+                "url": "https://api.github.com/repos/Intervention/image-laravel/zipball/24738a017d42a6fa8d9adabdbd69a2c19c5b0d30",
+                "reference": "24738a017d42a6fa8d9adabdbd69a2c19c5b0d30",
                 "shasum": ""
             },
             "require": {
                 "illuminate/support": "^8|^9|^10|^11",
-                "intervention/image": "^3",
+                "intervention/image": "^3.7",
                 "php": "^8.1"
             },
             "require-dev": {
@@ -1970,7 +1970,7 @@
             ],
             "support": {
                 "issues": "https://github.com/Intervention/image-laravel/issues",
-                "source": "https://github.com/Intervention/image-laravel/tree/1.2.0"
+                "source": "https://github.com/Intervention/image-laravel/tree/1.3.0"
             },
             "funding": [
                 {
@@ -1982,7 +1982,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2024-03-03T09:14:35+00:00"
+            "time": "2024-06-15T08:20:20+00:00"
         },
         {
             "name": "kyslik/column-sortable",

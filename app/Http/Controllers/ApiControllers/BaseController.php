@@ -15,7 +15,10 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 //use Intervention\Image\Facades\Image;
-use Image;
+use Intervention\Image\ImageManager;
+//use Intervention\Image\Laravel\Facades\Image;
+//use Image;
+use Intervention\Image\Facades\Image;
 use Illuminate\Http\UploadedFile;
 
 class BaseController extends Controller
@@ -28,6 +31,18 @@ class BaseController extends Controller
     public function __construct(ObjectRepository $objectRepository)
     {
         $this->objectRepository = $objectRepository;
+    }
+
+    function fillField($object, $slug, $value){
+        $field_db = Field::query()->where(['slug'=> $slug, 'enable' => true])->first();
+        if(!empty($field_db)) $object->field_value()->attach($field_db->id, ['value' => $value]);
+        return $object;
+    }
+
+    function detachField($object, $slug){
+        $field_db = Field::query()->where(['slug'=> $slug, 'enable' => true])->first();
+        $object->field_value()->detach($field_db->id);
+        return $object;
     }
 
     public function saveManipulation($model, $status = 'created'){

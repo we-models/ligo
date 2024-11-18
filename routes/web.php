@@ -34,6 +34,13 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+use Illuminate\Support\Facades\Http;
+
+Route::get('/image-proxy', function () {
+    $url = request('url');
+    $response = Http::get($url);
+    return response($response->body())->header('Content-Type', $response->header('Content-Type'));
+});
 
 
 
@@ -82,7 +89,7 @@ if(!function_exists('renderResource')){
 
     Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
-    Route::get('/images/{y}/{m}/{u}/{i}', [ImageController::class, 'getImage'])->name('image.getImage');
+    //Route::get('/images/{y}/{m}/{u}/{i}', [ImageController::class, 'getImage'])->name('image.getImage');
     Route::get('/files/{y}/{m}/{u}/{f}', [FileController::class, 'getFile'])->name('file.getFile');
 
     Route::group([
