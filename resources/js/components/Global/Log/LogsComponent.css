@@ -1,0 +1,141 @@
+.log_row_detail {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    padding-bottom: 5px;
+    padding-top: 5px;
+}
+
+.log_row_detail strong{
+    color: black;
+    font-weight: 600;
+}
+
+.log_objects {
+    font-size: 12px;
+    display: flex;
+    flex-direction: row;
+    max-width: 1200px;
+    margin:0 auto;
+}
+.log-objects-new {
+    flex: 5;
+    margin: 0 5px;
+}
+.button-link-table-mobile-logs{
+    text-align: end;
+}
+
+.items-card {
+    display: flex;
+    gap: 15px;
+    flex-direction: column;
+}
+
+.items-card .card {
+    padding: 20px;
+    background-color: var(--file);
+    border: none;
+}
+
+.separator-hr {
+    margin: 0 10px;
+    border: solid 1px;
+}
+
+.title-table {
+    text-align: center;
+    color: black;
+}
+
+.log-objects-old {
+    flex: 5;
+    margin: 0 5px;
+}
+
+.log_objects i {
+    font-size: 50px;
+}
+
+.header-list,
+.header-side {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    max-height: 50px;
+}
+
+.header-list {
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.table-logs-component td {
+    max-height: 150px;
+    overflow-y: auto;
+     
+    font-weight: 500;
+    font-size: 15px;
+    color: var(--primary);
+    background-color: unset;
+}
+
+@media screen and (max-width: 1024px) {
+    .header-list,
+    .header-side {
+        flex-direction: column;
+    }
+    .header-list, .header-side{
+        max-height: unset !important;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .log_objects {
+        flex-direction: column;
+    }
+
+    .header-list, .header-side{
+        max-height: unset !important;
+    }
+    .separator-hr {
+        margin: 10px 0;
+    }
+
+    .table-mobile-logs td {
+        font-size: 12px;
+
+        max-height: 150px;
+        overflow-y: scroll;
+         
+        font-weight: 600;
+        color: var(--primary);
+        background-color: unset;
+    }
+
+    .table-mobile-logs td p{
+        color: var(--primary);
+    }
+
+    .table-mobile-logs th strong {
+        background: unset;
+    }
+
+    .table-mobile-logs td p {
+        background: unset;
+        margin: 0;
+        padding: 0;
+    }
+
+    .content-table-mobile{
+        font-size: 11px;
+        max-height: 150px;
+        overflow-y: scroll;
+         
+        font-weight: 600;
+        color: var(--primary);
+        background-color: unset;
+    }
+
+    .title-collapse-table{
+        font-size: 11px;
+    }
+}

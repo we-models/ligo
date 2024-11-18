@@ -1,0 +1,130 @@
+.modal{
+    opacity: unset !important;
+    padding-top:35px;
+    background-color: rgba(0,0,0,0.7);
+    overflow-y: scroll;
+}
+.fade:not(.show) {
+    opacity: 0;
+}
+
+.div-for-img-log{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap:2px;
+}
+
+.img-log{
+    border:1px solid var(--accent);
+    padding:2px;
+}
+
+.img-log img{
+    max-height: 150px;
+}
+
+
+.remove_item{
+    color: var(--secondary);
+    padding-right: 10px;
+    cursor: pointer;
+}
+
+/* layout.css Style */
+.upload-drop-zone {
+    /* height: 100%; */
+
+    border-width: 2px;
+    margin-bottom: 20px;
+    color: var(--accent);
+    border-style: dashed;
+    border-color: var(--accent);
+    padding: 10px;
+    text-align: center;
+    overflow-y: scroll;
+}
+.upload-drop-zone.drop {
+    color: #222;
+    border-color: #222;
+}
+
+.inputfile {
+    opacity: 0;
+    overflow: hidden;
+    position: absolute;
+    z-index: -1;
+}
+.inputfile + label {
+    font-size: 1.25em;
+    font-weight: 700;
+    display: inline-block;
+}
+
+.inputfile:focus + label,
+.inputfile + label:hover {
+    background-color: var(--shade);
+}
+.inputfile + label {
+    cursor: pointer; /* "hand" cursor */
+}
+.inputfile:focus + label {
+    outline: 1px dotted #000;
+    outline: -webkit-focus-ring-color auto 5px;
+}
+.btn:focus, .btn:active, button:focus, button:active {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+.tab-content {
+    border:none !important;
+    /* background-color: var(--white); */
+    border:1px solid var(--accent);
+}
+
+.search_form{
+    height: 45px;
+}
+
+.center{
+    text-align: center;
+}
+
+.input_hd{
+    width: 100%;
+}
+
+.input_hd{
+    background-color: transparent;
+    border-bottom: 1px solid rgba(0,0,0,0.1) !important;
+    border-left: 0px;
+    border-right: 0px;
+}
+
+.table-detail tr td{
+    vertical-align: middle;
+}
+
+.btn_link_span {
+    cursor: pointer;
+    color: var(--primary);
+}
+
+.form-control:focus, .form-select:focus{
+    box-shadow: none;
+}
+
+.modal-body{
+    min-height: 500px;
+}
+
+
+fieldset:disabled .input-group{
+    background-color: var(--bs-secondary-bg);
+}
+
+
+.swal2-styled, .swal2-title, .swal2-html-container {
+     
+}

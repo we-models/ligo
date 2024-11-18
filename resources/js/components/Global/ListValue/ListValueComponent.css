@@ -1,0 +1,40 @@
+.img-list {
+    display: flex;
+    gap: 15px;
+    max-width: 400px
+}
+
+.img-card {
+    width: 200px;
+    height: 100px;
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: contain;
+    cursor: pointer;
+}
+
+.item-data {
+    max-height: 150px;
+    overflow-y: auto;
+     
+    font-weight: 500;
+    font-size: 14px;
+    color: var(--primary);
+    background-color: unset;
+}
+
+@media screen and (max-width: 768px) {
+    div{
+        background-color: transparent;
+    }
+    .img-card {
+        background-position: center left;
+    }
+
+    .item-definition, .item-data {
+        padding: 2px 0;
+    }
+    .item-data{
+        font-size: 11px;
+    }
+}

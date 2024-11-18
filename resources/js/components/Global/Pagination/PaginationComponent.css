@@ -1,0 +1,17 @@
+.page-item{
+    margin:0 2px;
+}
+.page-item button{
+
+}
+
+.pagination{
+    margin:0 auto;
+}
+
+.all-pages{
+    overflow-x: scroll;
+    overflow-y: hidden;
+    padding-bottom: 10px;
+    z-index: 1;
+}

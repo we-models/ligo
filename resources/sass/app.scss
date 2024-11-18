@@ -1,0 +1,30 @@
+// Fonts
+
+
+// Variables
+@import 'variables';
+
+$primary: #2d66af;
+$secondary: #f2b20e;
+
+$modal-sm: 400px;
+$modal-md: 600px;
+$modal-lg: 1000px; 
+$modal-xl: 1240px;
+
+$btn-border-radius: 0px;
+$nav-pills-border-radius: 0px;
+$card-border-radius: 0px;
+$input-border-radius: 0px;
+
+
+// Bootstrap
+@import 'bootstrap/scss/bootstrap';
+
+// Font-Awesome
+@import '@fortawesome/fontawesome-free/css/all.min.css';
+@import "@fortawesome/fontawesome-free/scss/fontawesome.scss";
+@import "@fortawesome/fontawesome-free/scss/regular.scss";
+@import "@fortawesome/fontawesome-free/scss/solid.scss";
+@import "@fortawesome/fontawesome-free/scss/brands.scss";
+

@@ -1,0 +1,98 @@
+@-webkit-keyframes fadeOut {
+    0% {
+        opacity: 1;
+    }
+
+    80% {
+        opacity: 0.20;
+        width: 100%;
+        height: 100%;
+    }
+
+    100% {
+        opacity: 0;
+        width: 0;
+        height: 0;
+        display: none;
+    }
+}
+
+@keyframes fadeOut {
+    0% {
+        opacity: 1;
+    }
+
+    80% {
+        opacity: 0.20;
+        width: 100%;
+        height: 100%;
+    }
+
+    100% {
+        opacity: 0;
+        width: 0;
+        height: 0;
+        display: none;
+    }
+}
+.container-alert{
+    position: absolute;
+    max-width: 420px;
+    width: 420px;
+    z-index: 2;
+    right: 0;
+}
+
+.dispel_hidden {
+    display: block;
+    /* -webkit-animation: fadeOut 2s;
+    animation: fadeOut 2s; */
+    animation-fill-mode: forwards;
+    max-height: 100px;
+}
+.alert-success, .alert-danger{
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.alert-success{
+    margin-right: 12px;
+    margin-left: 12px;
+    background-color: var(--accent);
+    color: var(--primary);
+    display: flex;
+    justify-content: space-between;
+}
+
+.alert-danger{
+    /* padding: 0 10px; */
+    margin-right: 12px;
+    margin-left: 12px;
+    background-color: var(--primary);
+    color: var(--accent);
+}
+
+.alert-danger .error-details{
+    color: var(--primary);
+}
+
+.fa-triangle-exclamation,  .fa-check{
+    font-size: 25px;
+    padding-right: 10px;
+}
+
+.fa-triangle-exclamation{
+    color: #ea5050;
+}
+
+.fa-check{
+    color: #0bbe0b;
+}
+
+
+@media screen and (max-width: 767px) {
+    .container-alert{
+        max-width: unset;
+        width: unset;
+    }
+  }

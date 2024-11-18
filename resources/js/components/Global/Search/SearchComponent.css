@@ -1,0 +1,9 @@
+.round-search{
+    display: flex;
+    flex-direction: row;
+    background-color: var(--accent);
+    max-height: 53px;
+}
+.btn_link_span{
+    margin: 15px;
+}

@@ -1,0 +1,46 @@
+{
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "dev": "vite",
+        "build": "npm run type-check && vite build",
+        "type-check": "vue-tsc"
+    },
+    "devDependencies": {
+        "@popperjs/core": "^2.11.8",
+        "@types/jquery": "^3.5.29",
+        "@types/vue-select": "^3.16.8",
+        "@vitejs/plugin-vue": "^4.5.0",
+        "@vue/tsconfig": "^0.5.1",
+        "axios": "^1.6.4",
+        "bootstrap": "^5.2.3",
+        "cross-env": "^7.0.3",
+        "laravel-vite-plugin": "^1.0.0",
+        "resolve-url-loader": "^5.0.0",
+        "rollup-plugin-copy": "^3.5.0",
+        "sass": "^1.56.1",
+        "ts-loader": "^9.5.1",
+        "typescript": "^5.3.3",
+        "vite": "^5.0.0",
+        "vue": "^3.2.37",
+        "vue-tsc": "^1.8.27"
+    },
+    "dependencies": {
+        "@fortawesome/fontawesome-free": "^6.5.1",
+        "@types/google.maps": "^3.55.12",
+        "date.js": "^0.3.3",
+        "dropzone": "^6.0.0-beta.2",
+        "firebase": "^10.8.0",
+        "jquery": "^3.7.1",
+        "laravel-vue-i18n": "^2.7.6",
+        "mitt": "^3.0.1",
+        "moment": "^2.29.4",
+        "pinia": "^2.1.7",
+        "sweetalert2": "^11.10.5",
+        "uuid": "^9.0.1",
+        "vite-plugin-static-copy": "^1.0.1",
+        "vue-i18n": "^9.10.2",
+        "vue-star-rating": "^1.7.0",
+        "vue3-google-map": "^0.20.0"
+    }
+}
